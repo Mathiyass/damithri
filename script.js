@@ -174,6 +174,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const playPop = () => playTone(300, 'triangle', 0.1);
     const playWhoosh = () => playTone(200, 'sine', 0.15);
 
+    // HAPPY BIRTHDAY MELODY
+    const playBirthdayMelody = () => {
+        const notes = [
+            { f: 392, d: 0.4 }, { f: 392, d: 0.4 }, { f: 440, d: 0.8 }, { f: 392, d: 0.8 }, { f: 523, d: 0.8 }, { f: 494, d: 1.2 },
+            { f: 392, d: 0.4 }, { f: 392, d: 0.4 }, { f: 440, d: 0.8 }, { f: 392, d: 0.8 }, { f: 587, d: 0.8 }, { f: 523, d: 1.2 },
+            { f: 392, d: 0.4 }, { f: 392, d: 0.4 }, { f: 784, d: 0.8 }, { f: 659, d: 0.8 }, { f: 523, d: 0.8 }, { f: 494, d: 0.8 }, { f: 440, d: 0.8 },
+            { f: 698, d: 0.4 }, { f: 698, d: 0.4 }, { f: 659, d: 0.8 }, { f: 523, d: 0.8 }, { f: 587, d: 0.8 }, { f: 523, d: 1.5 }
+        ];
+        let t = audioCtx.currentTime;
+        notes.forEach(n => {
+            playTone(n.f, 'sine', n.d * 0.3); // Shorten duration for staccato feel
+            t += n.d * 0.4;
+            setTimeout(() => playTone(n.f, 'triangle', n.d * 0.2), (t - audioCtx.currentTime) * 1000); // Layered sound
+        });
+    };
+
+    const audioBtn = document.getElementById('audio-btn');
+    let melodyInterval = null;
+    if (audioBtn) {
+        audioBtn.addEventListener('click', () => {
+            audioBtn.classList.toggle('on');
+            if (audioBtn.classList.contains('on')) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                playBirthdayMelody();
+                if (!melodyInterval) {
+                    melodyInterval = setInterval(playBirthdayMelody, 9000); // Loop approx
+                }
+            } else {
+                if (melodyInterval) {
+                    clearInterval(melodyInterval);
+                    melodyInterval = null;
+                }
+                audioCtx.suspend();
+            }
+        });
+    }
+
     // ─── CONFETTI SYSTEM (PHYSICS-ENHANCED) ───
     const burstConfetti = (n) => {
         for (let i = 0; i < n; i++) {
@@ -546,14 +583,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saved.length === 0) {
             saved.push({ msg: "Happy 25th! This is the start of something amazing! 🎉", date: new Date().toLocaleDateString() });
         }
-        saved.forEach(n => addNoteToBoard(n.msg, n.date));
+        saved.forEach((n, i) => addNoteToBoard(n.msg, n.date, i));
     };
 
-    const addNoteToBoard = (msg, date) => {
+    const deleteNote = (idx) => {
+        const saved = JSON.parse(localStorage.getItem('guestbook') || '[]');
+        if (idx > -1 && idx < saved.length) {
+            saved.splice(idx, 1);
+            localStorage.setItem('guestbook', JSON.stringify(saved));
+            loadGuestbook();
+            playPop();
+        }
+    };
+
+    const addNoteToBoard = (msg, date, idx) => {
         const board = document.getElementById('gb-board');
         const div = document.createElement('div');
         div.className = 'gb-note';
-        div.innerHTML = `<p>${msg}</p><span class="gb-date">${date}</span>`;
+        div.innerHTML = `<p>${msg}</p><span class="gb-date">${date}</span><button class="gb-del" aria-label="Delete Note">×</button>`;
+
+        // Attach event listener directly to avoid global scope issues
+        const delBtn = div.querySelector('.gb-del');
+        delBtn.onclick = () => deleteNote(idx);
+
         if (board) board.prepend(div);
     };
 
@@ -566,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const saved = JSON.parse(localStorage.getItem('guestbook') || '[]');
                 saved.push(note);
                 localStorage.setItem('guestbook', JSON.stringify(saved));
-                addNoteToBoard(note.msg, note.date);
+                loadGuestbook(); // Reload to update indices
                 txt.value = '';
                 burstConfetti(25);
                 playPop();
@@ -574,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ─── 3D GALLERY ───
+    // ─── 3D GALLERY & LIGHTBOX ───
     const initGallery = () => {
         const gal = document.querySelector('.gallery-3d');
         if (!gal) return;
@@ -586,13 +638,40 @@ document.addEventListener('DOMContentLoaded', () => {
         items.forEach((item, i) => {
             const angle = (i / count) * 360;
             item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+
+            // Lightbox Trigger
+            const img = item.querySelector('img');
+            if (img) {
+                item.addEventListener('click', (e) => {
+                    // Only open if not dragging
+                    if (!isDrag) openLightbox(img.src);
+                });
+            }
         });
+
+        // Lightbox Logic
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lb-img');
+        const lbClose = document.getElementById('lb-close');
+
+        const openLightbox = (src) => {
+            if (!lb || !lbImg) return;
+            lbImg.src = src;
+            lb.classList.remove('hidden');
+            playPop();
+        };
+
+        if (lbClose) lbClose.addEventListener('click', () => lb.classList.add('hidden'));
+        if (lb) lb.addEventListener('click', (e) => { if(e.target === lb) lb.classList.add('hidden'); });
 
         let currDeg = 0, isDrag = false, startX = 0, prevDeg = 0, autoRot = true;
 
         const container = document.querySelector('.gallery-3d-container');
 
         if (container) {
+            // Touch Action Hack
+            container.style.touchAction = 'none';
+
             container.addEventListener('mousedown', (e) => {
                 isDrag = true; autoRot = false;
                 startX = e.clientX; prevDeg = currDeg;

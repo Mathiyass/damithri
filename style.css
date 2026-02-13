@@ -844,11 +844,18 @@ body::before {
 }
 
 .glass:hover {
-    border-color: rgba(0, 255, 222, 0.25);
+    border-color: rgba(0, 255, 222, 0.4);
     box-shadow:
-        0 30px 60px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(0, 255, 222, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        0 30px 60px rgba(0, 0, 0, 0.6),
+        0 0 50px rgba(0, 255, 222, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px) scale(1.02);
+    animation: glassPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glassPulse {
+    from { border-color: rgba(0, 255, 222, 0.3); }
+    to { border-color: rgba(255, 0, 85, 0.3); }
 }
 
 /* SECTION TITLES — ENHANCED */
@@ -3316,4 +3323,101 @@ body::before {
     100% {
         box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
     }
+}
+
+/* KEYBOARD FOCUS */
+:focus-visible {
+    outline: 2px solid var(--c);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* ─── LIGHTBOX ─── */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 10005;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.4s var(--ease);
+}
+
+.lightbox.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.lb-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
+    transition: transform 0.4s var(--bounce);
+}
+
+.lightbox.hidden .lb-content {
+    transform: scale(0.8);
+}
+
+.lb-content img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 8px;
+    display: block;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    z-index: 10010;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.close-btn:hover {
+    background: rgba(255, 0, 60, 0.2);
+    border-color: var(--r);
+}
+
+/* ─── GUESTBOOK DELETE ─── */
+.gb-del {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 0, 60, 0.1);
+    color: var(--r);
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s;
+}
+
+.gb-note:hover .gb-del {
+    opacity: 1;
+}
+
+.gb-del:hover {
+    background: var(--r);
+    color: #fff;
 }
