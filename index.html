@@ -65,7 +65,7 @@
     <canvas id="stars-canvas"></canvas>
 
     <!-- AUDIO -->
-    <button id="audio-btn" class="ui-btn" title="Toggle Music">
+    <button id="audio-btn" class="ui-btn" title="Toggle Music" aria-label="Toggle Music">
         <span>🎵</span>
         <div class="viz"><span></span><span></span><span></span><span></span><span></span></div>
     </button>
@@ -93,8 +93,8 @@
     </nav>
 
     <!-- ARROWS -->
-    <button id="arr-up" class="ui-btn arr" disabled>&#9650;</button>
-    <button id="arr-dn" class="ui-btn arr">&#9660;</button>
+    <button id="arr-up" class="ui-btn arr" disabled aria-label="Scroll Up">&#9650;</button>
+    <button id="arr-dn" class="ui-btn arr" aria-label="Scroll Down">&#9660;</button>
 
     <!-- ═══════════ PAGES ═══════════ -->
     <main id="pages">
@@ -216,7 +216,7 @@
                         <div class="cake-l cb"></div>
                         <div class="plate"></div>
                     </div>
-                    <button id="blow-btn" class="cta"><span>🌬️ Blow the Candles!</span><i
+                    <button id="blow-btn" class="cta" aria-label="Blow the Candles"><span>🌬️ Blow the Candles!</span><i
                             class="cta-glow"></i></button>
                     <p class="msg" id="cake-msg">Make that wish we always talked about! 😉</p>
                 </div>
@@ -231,7 +231,7 @@
                 <p class="sub el">Like two halves of a whole heart. Connect us! 💖</p>
                 <div class="pz-arena el" id="pz-arena">
                     <div class="pz-col">
-                        <div class="piece lp" id="lh" draggable="true">
+                        <div class="piece lp" id="lh" draggable="true" role="button" tabindex="0" aria-label="Left Heart Piece">
                             <svg viewBox="0 0 120 200">
                                 <path d="M120 40C120 18 100 0 78 0 56 0 30 15 20 40 10 65 15 95 60 140L120 200 120 40Z"
                                     fill="currentColor" />
@@ -263,7 +263,7 @@
                         </div>
                     </div>
                     <div class="pz-col">
-                        <div class="piece rp" id="rh" draggable="true">
+                        <div class="piece rp" id="rh" draggable="true" role="button" tabindex="0" aria-label="Right Heart Piece">
                             <svg viewBox="0 0 120 200">
                                 <path d="M0 40C0 18 20 0 42 0 64 0 90 15 100 40 110 65 105 95 60 140L0 200 0 40Z"
                                     fill="currentColor" />
@@ -405,7 +405,7 @@
                 <p class="sub el">Leave a note for the future us to read!</p>
                 <div class="gb-form glass el">
                     <textarea id="gb-msg" placeholder="Write something sweet (or funny!)..." maxlength="140"></textarea>
-                    <button id="gb-btn" class="cta small"><span>🖊️ Sign It</span></button>
+                    <button id="gb-btn" class="cta small" aria-label="Sign Guestbook"><span>🖊️ Sign It</span></button>
                     <p class="hint" style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7;">(Note: Messages are saved
                         locally on your device!)</p>
                 </div>
@@ -444,9 +444,9 @@
                     </div>
                 </div>
                 <div class="wish-ctrl el">
-                    <button class="ui-btn" id="w-prev">◀</button>
+                    <button class="ui-btn" id="w-prev" aria-label="Previous Wish">◀</button>
                     <div id="w-dots"></div>
-                    <button class="ui-btn" id="w-next">▶</button>
+                    <button class="ui-btn" id="w-next" aria-label="Next Wish">▶</button>
                 </div>
             </div>
         </section>
@@ -479,11 +479,11 @@
                         <li>✅ Creating chaos together</li>
                     </ul>
                     <div class="cert-sign-area">
-                        <button id="sign-btn" class="cta small"><span>✍️ Sign & Seal</span></button>
+                        <button id="sign-btn" class="cta small" aria-label="Sign Certificate"><span>✍️ Sign & Seal</span></button>
                         <div class="stamp hidden" id="cert-stamp">SEALED FOREVER 💖</div>
                     </div>
                 </div>
-                <button id="mega-btn" class="cta mega el"><span>🎊 Cheers to Us! 🎊</span><i
+                <button id="mega-btn" class="cta mega el" aria-label="Celebrate"><span>🎊 Cheers to Us! 🎊</span><i
                         class="cta-glow"></i></button>
                 <footer class="foot">Made with 💖 by your Bestie • Feb 14, 2026</footer>
             </div>
@@ -493,6 +493,14 @@
 
     <!-- TRANSITION OVERLAY -->
     <div id="trans"></div>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox" class="hidden">
+        <button id="lb-close" class="ui-btn close-btn" aria-label="Close Lightbox">×</button>
+        <div class="lb-content glass">
+            <img id="lb-img" src="" alt="Full size memory">
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
