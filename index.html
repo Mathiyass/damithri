@@ -74,22 +74,23 @@
     <div id="pg-counter">
         <span id="pg-cur">01</span>
         <div class="pg-line"></div>
-        <span id="pg-tot">11</span>
+        <span id="pg-tot">12</span>
     </div>
 
     <!-- NAV DOTS -->
     <nav id="dots">
-        <a class="dot active" data-p="0"><i></i><em>Welcome</em></a>
-        <a class="dot" data-p="1"><i></i><em>25 Years</em></a>
-        <a class="dot" data-p="2"><i></i><em>Wish</em></a>
-        <a class="dot" data-p="3"><i></i><em>Heart</em></a>
-        <a class="dot" data-p="4"><i></i><em>Gift</em></a>
-        <a class="dot" data-p="5"><i></i><em>Letters</em></a>
-        <a class="dot" data-p="6"><i></i><em>Balloons</em></a>
-        <a class="dot" data-p="7"><i></i><em>Gallery</em></a>
-        <a class="dot" data-p="8"><i></i><em>Guestbook</em></a>
-        <a class="dot" data-p="9"><i></i><em>Wishes</em></a>
-        <a class="dot" data-p="10"><i></i><em>Finale</em></a>
+        <a class="dot active" data-p="0" aria-label="Go to Welcome"><i></i><em>Welcome</em></a>
+        <a class="dot" data-p="1" aria-label="Go to 25 Years"><i></i><em>25 Years</em></a>
+        <a class="dot" data-p="2" aria-label="Go to Wish"><i></i><em>Wish</em></a>
+        <a class="dot" data-p="3" aria-label="Go to Heart"><i></i><em>Heart</em></a>
+        <a class="dot" data-p="4" aria-label="Go to Gift"><i></i><em>Gift</em></a>
+        <a class="dot" data-p="5" aria-label="Go to Letters"><i></i><em>Letters</em></a>
+        <a class="dot" data-p="6" aria-label="Go to Balloons"><i></i><em>Balloons</em></a>
+        <a class="dot" data-p="7" aria-label="Go to Gallery"><i></i><em>Gallery</em></a>
+        <a class="dot" data-p="8" aria-label="Go to Guestbook"><i></i><em>Guestbook</em></a>
+        <a class="dot" data-p="9" aria-label="Go to Wishes"><i></i><em>Wishes</em></a>
+        <a class="dot" data-p="10" aria-label="Go to Memory Match"><i></i><em>Memory</em></a>
+        <a class="dot" data-p="11" aria-label="Go to Finale"><i></i><em>Finale</em></a>
     </nav>
 
     <!-- ARROWS -->
@@ -117,7 +118,7 @@
                 <h2 class="hero-name flicker el">Damithri</h2>
                 <p class="hero-sub el" id="hero-sub">Years may fly, but our memories stay forever young. To my <span
                         class="grad-text">Day 1 Friend</span>! 💖</p>
-                <button id="start-btn" class="cta el">
+                <button id="start-btn" class="cta el" aria-label="Start Celebration">
                     <span>🎉 Let's Celebrate Us! 🎁</span>
                     <i class="cta-glow"></i>
                 </button>
@@ -452,7 +453,23 @@
             </div>
         </section>
 
-        <!-- 10: FINALE -->
+        <!-- 10: MEMORY MATCH -->
+        <section class="pg" id="pg-memory" data-anim="zoom">
+            <div class="gradient-mesh m2"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">🧠 Memory Match 🧠</h2>
+                <p class="sub el">Match the memories to unlock a special message!</p>
+                <div class="memory-board el" id="memory-board">
+                    <!-- Cards injected via JS -->
+                </div>
+                <div class="memory-win hidden" id="memory-win">
+                    <h3 class="grad-text">🎉 Perfect Match! 🎉</h3>
+                    <p class="sub">Just like us! 👯‍♀️</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11: FINALE -->
         <section class="pg" id="pg-fin" data-anim="zoom">
             <div class="gradient-mesh m1"></div>
             <div class="pg-c">
