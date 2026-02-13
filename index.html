@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎂 Happy 25th Birthday Damithri! 🎉</title>
+    <meta name="description" content="A magical, interactive 25th birthday celebration website for Damithri. Creating memories that last forever!">
+    <meta property="og:title" content="Happy 25th Birthday Damithri! 🎂">
+    <meta property="og:description" content="Join the celebration! A special interactive experience for a special person.">
+    <meta property="og:image" content="https://ui-avatars.com/api/?name=Damithri&background=0D8ABC&color=fff&size=512">
+    <meta property="og:url" content="https://damithri25.github.io/">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;600;700;800&family=Dancing+Script:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="pl-inner">
+            <div class="pl-ring"></div>
+            <div class="pl-ring"></div>
+            <div class="pl-ring"></div>
+            <div class="pl-heart">💖</div>
+        </div>
+        <p class="pl-text">Creating magic for Damithri...</p>
+        <div class="pl-bar-wrap">
+            <div class="pl-bar"></div>
+        </div>
+        <div class="pl-pct" id="pl-pct">0%</div>
+    </div>
+
+    <!-- CANVAS LAYERS -->
+    <canvas id="particle-canvas"></canvas>
+    <canvas id="fireworks-canvas"></canvas>
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- AUDIO -->
+    <button id="audio-btn" class="ui-btn" title="Toggle Music">
+        <span>🎵</span>
+        <div class="viz"><span></span><span></span><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- PAGE COUNTER -->
+    <div id="pg-counter">
+        <span id="pg-cur">01</span>
+        <div class="pg-line"></div>
+        <span id="pg-tot">11</span>
+    </div>
+
+    <!-- NAV DOTS -->
+    <nav id="dots">
+        <a class="dot active" data-p="0"><i></i><em>Welcome</em></a>
+        <a class="dot" data-p="1"><i></i><em>25 Years</em></a>
+        <a class="dot" data-p="2"><i></i><em>Wish</em></a>
+        <a class="dot" data-p="3"><i></i><em>Heart</em></a>
+        <a class="dot" data-p="4"><i></i><em>Gift</em></a>
+        <a class="dot" data-p="5"><i></i><em>Letters</em></a>
+        <a class="dot" data-p="6"><i></i><em>Balloons</em></a>
+        <a class="dot" data-p="7"><i></i><em>Gallery</em></a>
+        <a class="dot" data-p="8"><i></i><em>Guestbook</em></a>
+        <a class="dot" data-p="9"><i></i><em>Wishes</em></a>
+        <a class="dot" data-p="10"><i></i><em>Finale</em></a>
+    </nav>
+
+    <!-- ARROWS -->
+    <button id="arr-up" class="ui-btn arr" disabled>&#9650;</button>
+    <button id="arr-dn" class="ui-btn arr">&#9660;</button>
+
+    <!-- ═══════════ PAGES ═══════════ -->
+    <main id="pages">
+
+        <!-- 0: HERO -->
+        <section class="pg" id="pg-hero" data-anim="zoom">
+            <div class="gradient-mesh m1"></div>
+            <div class="orbs">
+                <div class="orb o1"></div>
+                <div class="orb o2"></div>
+                <div class="orb o3"></div>
+            </div>
+            <div class="pg-c">
+                <div class="badge el">✨ February 14, 2026 ✨</div>
+                <h1 class="hero-title el">
+                    <span class="ht-line ht1">Happy</span>
+                    <span class="ht-line ht2 glitch" data-text="25th">25<sup>th</sup></span>
+                    <span class="ht-line ht3">Birthday</span>
+                </h1>
+                <h2 class="hero-name flicker el">Damithri</h2>
+                <p class="hero-sub el" id="hero-sub">Years may fly, but our memories stay forever young. To my <span
+                        class="grad-text">Day 1 Bestie</span>! 💖</p>
+                <button id="start-btn" class="cta el">
+                    <span>🎉 Let's Celebrate Us! 🎁</span>
+                    <i class="cta-glow"></i>
+                </button>
+                <div class="scroll-cue el">
+                    <div class="mouse">
+                        <div class="whl"></div>
+                    </div>
+                    <small>Scroll for memories ↓</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1: COUNTDOWN -->
+        <section class="pg" id="pg-count" data-anim="slide-up">
+            <div class="gradient-mesh m2"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">🎂 25 Years of You 🎂</h2>
+                <div class="counters el">
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="yr">0</div><small>Years</small>
+                    </div>
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="mo">0</div><small>Months</small>
+                    </div>
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="dy">0</div><small>Days</small>
+                    </div>
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="hr">0</div><small>Hours</small>
+                    </div>
+                </div>
+                <p class="fact glass el">🌟 And I've been lucky to know you for the best of them! <strong
+                        class="grad-text">Bestie Era: Ongoing</strong>
+                </p>
+                <div class="timeline el">
+                    <div class="tl-track"></div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div><span>2001</span><small>🌟 The Star is Born</small>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div><span>2007</span><small>📚 School Days</small>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div><span>2013</span><small>🦋 Our Chaos Began</small>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-dot"></div><span>2019</span><small>🎓 Growing Up</small>
+                    </div>
+                    <div class="tl-item now">
+                        <div class="tl-dot glow"></div><span>2026</span><small>🎂 25 & Fabulous</small>
+                    </div>
+                </div>
+                <div class="cube-w el">
+                    <div class="cube">
+                        <div class="face front">🎓<br><small>Smart</small></div>
+                        <div class="face back">🤩<br><small>Iconic</small></div>
+                        <div class="face right">💖<br><small>Loyal</small></div>
+                        <div class="face left">🌟<br><small>Star</small></div>
+                        <div class="face top">🎉<br><small>Fun</small></div>
+                        <div class="face bottom">🔥<br><small>Fierce</small></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2: CAKE -->
+        <section class="pg" id="pg-cake" data-anim="scale">
+            <div class="gradient-mesh m3"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">🕯️ Wish Big, Bestie! 🕯️</h2>
+                <div class="cake-scene el">
+                    <div class="cake-3d">
+                        <div class="candles">
+                            <div class="candle">
+                                <div class="flame" id="f1"></div>
+                            </div>
+                            <div class="candle">
+                                <div class="flame" id="f2"></div>
+                            </div>
+                            <div class="candle">
+                                <div class="flame" id="f3"></div>
+                            </div>
+                            <div class="candle">
+                                <div class="flame" id="f4"></div>
+                            </div>
+                            <div class="candle">
+                                <div class="flame" id="f5"></div>
+                            </div>
+                        </div>
+                        <div class="cake-l ct">
+                            <div class="drip"></div>
+                            <div class="drip"></div>
+                            <div class="drip"></div><span>Damithri</span>
+                        </div>
+                        <div class="cake-l cm"></div>
+                        <div class="cake-l cb"></div>
+                        <div class="plate"></div>
+                    </div>
+                    <button id="blow-btn" class="cta"><span>🌬️ Blow the Candles!</span><i
+                            class="cta-glow"></i></button>
+                    <p class="msg" id="cake-msg">Make that wish we always talked about! 😉</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3: HEART PUZZLE -->
+        <section class="pg" id="pg-puzzle" data-anim="slide-l">
+            <div class="gradient-mesh m4"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">💕 Partners in Crime 💕</h2>
+                <p class="sub el">Like two halves of a whole heart. Connect us! 💖</p>
+                <div class="pz-arena el" id="pz-arena">
+                    <div class="pz-col">
+                        <div class="piece lp" id="lh" draggable="true">
+                            <svg viewBox="0 0 120 200">
+                                <path d="M120 40C120 18 100 0 78 0 56 0 30 15 20 40 10 65 15 95 60 140L120 200 120 40Z"
+                                    fill="currentColor" />
+                            </svg>
+                            <small>You</small>
+                        </div>
+                    </div>
+                    <div class="pz-drop" id="pz-drop">
+                        <div class="ghost-h">
+                            <svg viewBox="0 0 240 200">
+                                <path
+                                    d="M120 200C15 95 10 65 20 40 30 15 56 0 78 0 100 0 120 18 120 40 120 18 140 0 162 0 184 0 210 15 220 40 230 65 225 95 120 200Z"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="8 4" />
+                            </svg>
+                        </div>
+                        <span class="drop-lbl">Together Forever</span>
+                        <div class="full-heart hidden" id="full-h">
+                            <svg viewBox="0 0 240 200">
+                                <defs>
+                                    <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#FF003C" />
+                                        <stop offset="100%" stop-color="#00FFDE" />
+                                    </linearGradient>
+                                </defs>
+                                <path
+                                    d="M120 200C15 95 10 65 20 40 30 15 56 0 78 0 100 0 120 18 120 40 120 18 140 0 162 0 184 0 210 15 220 40 230 65 225 95 120 200Z"
+                                    fill="url(#hg)" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="pz-col">
+                        <div class="piece rp" id="rh" draggable="true">
+                            <svg viewBox="0 0 120 200">
+                                <path d="M0 40C0 18 20 0 42 0 64 0 90 15 100 40 110 65 105 95 60 140L0 200 0 40Z"
+                                    fill="currentColor" />
+                            </svg>
+                            <small>Me</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="pz-win hidden" id="pz-win">
+                    <h3 class="grad-text">✨ Unbreakable Bond! ✨</h3>
+                    <p class="sub">Through thick and thin, always. 💕</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4: GIFT -->
+        <section class="pg" id="pg-gift" data-anim="flip">
+            <div class="gradient-mesh m5"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">🎁 A Promise 🎁</h2>
+                <p class="sub el">Open it, it's for you!</p>
+                <div class="gift-w el" id="gift-w">
+                    <div class="gift" id="gift-box">
+                        <div class="gift-lid" id="gift-lid">
+                            <div class="bow"></div>
+                        </div>
+                        <div class="gift-body">
+                            <div class="rv"></div>
+                            <div class="rh"></div>
+                        </div>
+                        <div class="gift-sparkle"></div>
+                    </div>
+                    <p class="tap">Tap me! 🎁</p>
+                </div>
+                <div class="gift-reveal hidden" id="gift-reveal">
+                    <div class="reveal-card glass">
+                        <div id="eburst"></div>
+                        <h3 class="grad-text">✨ To My Friend ✨</h3>
+                        <p class="dim">Damithri, from our first awkward hellos to this beautiful 25th milestone, you've
+                            been my constant. You aren't just a best friend; you're family. No matter where life takes
+                            us, I'm always in your corner. Happy Birthday, sister from another mister! 💖✨</p>
+                        <div class="rainbow-border"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5: TYPEWRITER -->
+        <section class="pg" id="pg-tw" data-anim="fade">
+            <div class="gradient-mesh m6"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">💝 Notes to My Bestie 💝</h2>
+                <div class="tw-wrap el">
+                    <div class="tw-card glass">
+                        <div class="tw-top"><span>💖</span><span class="spin-icon">✨</span><span>💖</span></div>
+                        <p class="tw-text" id="tw-text"></p>
+                        <div class="tw-dots" id="tw-dots"></div>
+                    </div>
+                </div>
+                <div class="float-deco" id="float-deco"></div>
+            </div>
+        </section>
+
+        <!-- 6: BALLOONS -->
+        <section class="pg" id="pg-bal" data-anim="bounce">
+            <div class="gradient-mesh m7"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">🎈 Pop for Good Luck! 🎈</h2>
+                <p class="sub el">Every pop is a wish coming true!</p>
+                <div class="b-score el"><span>Wishes Unlocked: </span><strong id="b-sc">0</strong><span> / 15</span>
+                </div>
+                <div class="b-arena" id="b-arena"></div>
+                <div class="b-prize hidden" id="b-prize">
+                    <h3 class="grad-text">🎉 All Wishes Granted! 🏆</h3>
+                    <p class="sub">The universe is on your side today!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7: 3D GALLERY -->
+        <section class="pg" id="pg-gal" data-anim="slide-r">
+            <div class="gradient-mesh m8"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">📸 Memory Lane 📸</h2>
+                <div class="gallery-3d-container el">
+                    <div class="gallery-3d">
+                        <!-- Images will be injected by JS or placeholders used -->
+                        <!-- Using the one existing image and placeholders -->
+                        <div class="g3d-item"><img src="img/622801959_17845870185673653_431096063676591540_n.jpg"
+                                alt="Memory" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Bestie&background=ff003c&color=fff&size=200';"></div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>🦋</span>
+                                <p>Pure Joy</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>👯‍♀️</span>
+                                <p>Twinning</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>💃</span>
+                                <p>Party Time</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>🤣</span>
+                                <p>Inside Jokes</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>🏖️</span>
+                                <p>Adventures</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>🍕</span>
+                                <p>FoodComa</p>
+                            </div>
+                        </div>
+                        <div class="g3d-item">
+                            <div class="g3d-ph"><span>🎓</span>
+                                <p>Big Dreams</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="hint el">Drag or swipe to spin the memories! ✨</p>
+            </div>
+        </section>
+
+        <!-- 8: GUESTBOOK (NEW) -->
+        <section class="pg" id="pg-guest" data-anim="zoom">
+            <div class="gradient-mesh m9"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">📒 Bestie Guestbook 📒</h2>
+                <p class="sub el">Leave a note for the future us to read!</p>
+                <div class="gb-form glass el">
+                    <textarea id="gb-msg" placeholder="Write something sweet (or funny!)..." maxlength="140"></textarea>
+                    <button id="gb-btn" class="cta small"><span>🖊️ Sign It</span></button>
+                    <p class="hint" style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7;">(Note: Messages are saved locally on your device!)</p>
+                </div>
+                <div class="gb-board el" id="gb-board">
+                    <!-- Messages appear here -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 9: WISHES -->
+        <section class="pg" id="pg-wish" data-anim="rotate">
+            <div class="gradient-mesh m10"></div>
+            <div class="pg-c">
+                <h2 class="sec-title el">💌 Poems for You 💌</h2>
+                <div class="wishes-box" id="wishes-box">
+                    <div class="wish glass active" data-w="0">
+                        <div class="wish-i">🌟</div>
+                        <p>"To the girl who knew me when, <br>And loves me just the same again. <br>Happy 25th, my
+                            friend!"</p>
+                    </div>
+                    <div class="wish glass" data-w="1">
+                        <div class="wish-i">🦋</div>
+                        <p>"Quarter of a century, look at you shine, <br>So glad that this best friend of mine, <br>Is
+                            celebrated like the finest wine!"</p>
+                    </div>
+                    <div class="wish glass" data-w="2">
+                        <div class="wish-i">🔥</div>
+                        <p>"Through school days and teenage tears, <br>We've conquered all our silly fears. <br>Here's
+                            to the next 25 years!"</p>
+                    </div>
+                    <div class="wish glass" data-w="3">
+                        <div class="wish-i">🎁</div>
+                        <p>"Memories old and memories new, <br>There's no one quite as true as you. <br>I love you
+                            bestie, through and through!"</p>
+                    </div>
+                </div>
+                <div class="wish-ctrl el">
+                    <button class="ui-btn" id="w-prev">◀</button>
+                    <div id="w-dots"></div>
+                    <button class="ui-btn" id="w-next">▶</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10: FINALE -->
+        <section class="pg" id="pg-fin" data-anim="zoom">
+            <div class="gradient-mesh m1"></div>
+            <div class="pg-c">
+                <div class="heart-3d el">
+                    <div class="heart-shape"></div>
+                </div>
+                <h2 class="fin-title el">Happy Birthday<br><span class="grad-text fin-name flicker">Damithri!</span>
+                </h2>
+                <p class="sub el">Forever my favorite person 💎</p>
+                <div class="age-ring el"><span>25</span></div>
+                <div class="scratch-w el">
+                    <p class="hint">🎫 Scratch for a prediction!</p>
+                    <div class="scratch"><canvas id="scratch-c" width="320" height="120"></canvas>
+                        <div class="scratch-msg">✨ Together we are unstoppable! 👯‍♀️💖</div>
+                    </div>
+                </div>
+                <p class="fin-msg el">Love you to the moon and back! 🌙✨</p>
+                <div class="certificate glass el" id="bestie-cert">
+                    <h3>📜 Official Bestie Certificate 📜</h3>
+                    <p>This certifies that <strong>Damithri</strong> & <strong>Me</strong> are bound by the sacred laws
+                        of friendship.</p>
+                    <ul class="cert-list">
+                        <li>✅ Always having each other's back</li>
+                        <li>✅ Sharing all the tea ☕</li>
+                        <li>✅ Creating chaos together</li>
+                    </ul>
+                    <div class="cert-sign-area">
+                        <button id="sign-btn" class="cta small"><span>✍️ Sign & Seal</span></button>
+                        <div class="stamp hidden" id="cert-stamp">SEALED FOREVER 💖</div>
+                    </div>
+                </div>
+                <button id="mega-btn" class="cta mega el"><span>🎊 Cheers to Us! 🎊</span><i
+                        class="cta-glow"></i></button>
+                <footer class="foot">Made with 💖 by your Bestie • Feb 14, 2026</footer>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TRANSITION OVERLAY -->
+    <div id="trans"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
