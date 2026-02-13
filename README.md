@@ -1,12 +1,13 @@
-# 🎂 Damithri's 25th Birthday Celebration Site
+# 🎂 Damithri's 25th Birthday Celebration Site — Ultra Premium v9.0
 
 A magical, interactive, and fully responsive birthday website designed to celebrate Damithri's 25th birthday! This project features smooth animations, a 3D gallery, a virtual cake blowing experience, and more.
 
 ## ✨ Features
 
-- **Interactive Storytelling**: A 10-page journey through memories and wishes.
-- **3D Animations**: Custom particle effects, fireworks, and 3D CSS transformations.
-- **Virtual Cake**: A blowable candle simulation (click or use microphone if implemented).
+- **Interactive Storytelling**: A 12-page journey through memories and wishes.
+- **🧠 Memory Match Game**: A fun mini-game to unlock a special message.
+- **3D Animations**: Custom particle effects, fireworks, and 3D CSS transformations (optimized for performance).
+- **Virtual Cake**: A blowable candle simulation (click or use microphone).
 - **Guestbook**: A local-storage based guestbook to sign messages.
 - **Responsive Design**: Looks great on mobile and desktop.
 - **Audio Experience**: Background music and sound effects (requires user interaction to start).

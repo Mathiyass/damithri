@@ -79,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const animate = () => {
+            if (document.hidden) {
+                requestAnimationFrame(animate);
+                return;
+            }
             ctx.clearRect(0, 0, width, height);
 
             for(let i = 0; i < particles.length; i++) {
@@ -132,6 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const drawStars = () => {
+            if (document.hidden) {
+                requestAnimationFrame(drawStars);
+                return;
+            }
             ctx.clearRect(0, 0, w, h);
             stars.forEach(s => {
                 s.alpha += s.twinkle * s.dir;
@@ -347,6 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (id === 'pg-guest') loadGuestbook();
         if (id === 'pg-count') startCountdown();
         if (id === 'pg-tw') spawnFloatingDecos();
+        if (id === 'pg-memory') initMemoryGame();
     };
 
     // ─── 3D TILT EFFECT ───
@@ -634,7 +643,13 @@ document.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('mousemove', (e) => { if(isDrag) { currDeg = prevDeg - (e.clientX - startX) * 0.5; gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`; } });
             window.addEventListener('mouseup', () => { isDrag = false; gal.classList.remove('grabbing'); });
         }
-        const autoRot = () => { if(!isDrag) { currDeg += 0.2; gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`; } requestAnimationFrame(autoRot); };
+        const autoRot = () => {
+            if (!document.hidden && !isDrag) {
+                currDeg += 0.2;
+                gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`;
+            }
+            requestAnimationFrame(autoRot);
+        };
         autoRot();
     };
     initGallery();
@@ -762,5 +777,55 @@ document.addEventListener('DOMContentLoaded', () => {
         mBtn.classList.add('celebrated');
     });
 
-    console.log(`%c🚀 Damithri's 25th Premium Engine v8 Loaded!`, 'color:#00f2ea;font-weight:bold;font-size:14px;background:#000;padding:5px;');
+    // ─── MEMORY MATCH ───
+    let memGameInited = false;
+    const initMemoryGame = () => {
+        if(memGameInited) return;
+        const board = document.getElementById('memory-board');
+        if(!board) return;
+        memGameInited = true;
+        board.innerHTML = '';
+        const items = ['🍕','🦋','💃','🤣','🎓','💖','🌟','🔥'];
+        const deck = [...items, ...items].sort(() => 0.5 - Math.random());
+        let first = null, lock = false, matches = 0;
+
+        deck.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.tabIndex = 0; // Accessibility
+            card.innerHTML = `<div class="memory-face memory-front">${item}</div><div class="memory-face memory-back">❓</div>`;
+
+            const flip = () => {
+                if(lock || card === first || card.classList.contains('flipped')) return;
+                card.classList.add('flipped'); playTick();
+
+                if(!first) {
+                    first = card;
+                } else {
+                    lock = true;
+                    if(first.innerText === card.innerText) {
+                        first.removeEventListener('click', flip);
+                        card.removeEventListener('click', flip);
+                        first.classList.add('matched'); card.classList.add('matched');
+                        first = null; lock = false; matches++; playChime();
+                        if(matches === items.length) {
+                            setTimeout(() => { document.getElementById('memory-win').classList.remove('hidden'); launchFW(10); }, 500);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            first.classList.remove('flipped');
+                            card.classList.remove('flipped');
+                            first = null; lock = false;
+                        }, 1000);
+                    }
+                }
+            };
+
+            card.addEventListener('click', flip);
+            card.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+            board.appendChild(card);
+        });
+    };
+
+    console.log(`%c🚀 Damithri's 25th Premium Engine v9.0 Loaded!`, 'color:#00f2ea;font-weight:bold;font-size:14px;background:#000;padding:5px;');
 });
