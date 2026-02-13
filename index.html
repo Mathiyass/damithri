@@ -32,7 +32,7 @@
     <!-- PRELOADER - SIGNATURE ANIMATION -->
     <div id="preloader">
         <div class="sig-container">
-            <svg class="sig-svg" viewBox="0 0 400 200" width="300" height="150">
+            <svg class="sig-svg" viewBox="0 0 400 200">
                 <defs>
                     <linearGradient id="sig-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" style="stop-color:#00FFDE;stop-opacity:1" />
@@ -64,10 +64,18 @@
     <canvas id="fireworks-canvas"></canvas>
     <canvas id="stars-canvas"></canvas>
 
+    <!-- AMBIENT FLOATING LAYER -->
+    <div id="ambient-layer"></div>
+
     <!-- AUDIO -->
     <button id="audio-btn" class="ui-btn" title="Toggle Music" aria-label="Toggle Music">
         <span>🎵</span>
         <div class="viz"><span></span><span></span><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- THEME TOGGLE -->
+    <button id="theme-btn" class="ui-btn" title="Switch Theme" aria-label="Switch Theme">
+        <span>🎨</span>
     </button>
 
     <!-- PAGE COUNTER -->
@@ -115,7 +123,7 @@
                     <span class="ht-line ht2 glitch" data-text="25th">25<sup>th</sup></span>
                     <span class="ht-line ht3">Birthday</span>
                 </h1>
-                <h2 class="hero-name flicker el">Damithri</h2>
+                <h2 class="hero-name flicker glitch el" data-text="Damithri">Damithri</h2>
                 <p class="hero-sub el" id="hero-sub">Years may fly, but our memories stay forever young. To my <span
                         class="grad-text">Day 1 Friend</span>! 💖</p>
                 <button id="start-btn" class="cta el" aria-label="Start Celebration">
@@ -148,6 +156,12 @@
                     </div>
                     <div class="cnt-card glass">
                         <div class="cnt-n" id="hr">0</div><small>Hours</small>
+                    </div>
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="mi">0</div><small>Minutes</small>
+                    </div>
+                    <div class="cnt-card glass">
+                        <div class="cnt-n" id="sc">0</div><small>Seconds</small>
                     </div>
                 </div>
                 <p class="fact glass el">🌟 And I've been lucky to know you for the best of them! <strong
@@ -219,8 +233,11 @@
                     </div>
                     <button id="blow-btn" class="cta" aria-label="Blow the Candles"><span>🌬️ Blow the Candles!</span><i
                             class="cta-glow"></i></button>
-                    <button id="mic-btn" class="cta small" aria-label="Enable Microphone" style="margin-left: 10px; font-size: 0.9rem; padding: 12px 25px;"><span>🎤 Enable Mic</span></button>
-                    <p class="msg" id="cake-msg">Make that wish we always talked about! 😉<br><small class="hint" id="mic-hint">(Or click the button if you're shy!)</small></p>
+                    <button id="mic-btn" class="cta small" aria-label="Enable Microphone"
+                        style="margin-left: 10px; font-size: 0.9rem; padding: 12px 25px;"><span>🎤 Enable
+                            Mic</span></button>
+                    <p class="msg" id="cake-msg">Make that wish we always talked about! 😉<br><small class="hint"
+                            id="mic-hint">(Or click the button if you're shy!)</small></p>
                 </div>
             </div>
         </section>
@@ -233,7 +250,8 @@
                 <p class="sub el">Like two halves of a whole heart. Connect us! 💖</p>
                 <div class="pz-arena el" id="pz-arena">
                     <div class="pz-col">
-                        <div class="piece lp" id="lh" draggable="true" role="button" tabindex="0" aria-label="Left Heart Piece">
+                        <div class="piece lp" id="lh" draggable="true" role="button" tabindex="0"
+                            aria-label="Left Heart Piece">
                             <svg viewBox="0 0 120 200">
                                 <path d="M120 40C120 18 100 0 78 0 56 0 30 15 20 40 10 65 15 95 60 140L120 200 120 40Z"
                                     fill="currentColor" />
@@ -265,7 +283,8 @@
                         </div>
                     </div>
                     <div class="pz-col">
-                        <div class="piece rp" id="rh" draggable="true" role="button" tabindex="0" aria-label="Right Heart Piece">
+                        <div class="piece rp" id="rh" draggable="true" role="button" tabindex="0"
+                            aria-label="Right Heart Piece">
                             <svg viewBox="0 0 120 200">
                                 <path d="M0 40C0 18 20 0 42 0 64 0 90 15 100 40 110 65 105 95 60 140L0 200 0 40Z"
                                     fill="currentColor" />
@@ -396,6 +415,11 @@
                     </div>
                 </div>
                 <p class="hint el">Drag or swipe to spin the memories! ✨</p>
+                <div class="upload-area el" id="upload-area">
+                    <p>📷 <strong>Upload a Memory</strong></p>
+                    <p class="hint">Click or drag a photo here</p>
+                    <input type="file" id="photo-upload" accept="image/*">
+                </div>
             </div>
         </section>
 
@@ -436,7 +460,7 @@
                     </div>
                     <div class="wish glass" data-w="2">
                         <div class="wish-i">🔥</div>
-                        <p>"Through school days and teenage tears, <br>We've conquered all our silly fears. <br>Here's
+                        <p>"Through uni days and lecture tears, <br>We've conquered all our silly fears. <br>Here's
                             to the next 25 years!"</p>
                     </div>
                     <div class="wish glass" data-w="3">
@@ -497,7 +521,8 @@
                         <li>✅ Creating chaos together</li>
                     </ul>
                     <div class="cert-sign-area">
-                        <button id="sign-btn" class="cta small" aria-label="Sign Certificate"><span>✍️ Sign & Seal</span></button>
+                        <button id="sign-btn" class="cta small" aria-label="Sign Certificate"><span>✍️ Sign &
+                                Seal</span></button>
                         <div class="stamp hidden" id="cert-stamp">SEALED FOREVER 💖</div>
                     </div>
                 </div>

@@ -19,10 +19,10 @@ const CONFIG = {
 document.addEventListener('DOMContentLoaded', () => {
     // ─── CONSTANTS & CONFIG ───
     const C = CONFIG.themeColors.primary,
-          R = CONFIG.themeColors.secondary,
-          G = CONFIG.themeColors.accent,
-          PK = CONFIG.themeColors.soft,
-          PU = CONFIG.themeColors.deep;
+        R = CONFIG.themeColors.secondary,
+        G = CONFIG.themeColors.accent,
+        PK = CONFIG.themeColors.soft,
+        PU = CONFIG.themeColors.deep;
     const COLS = [C, R, G, PK, PU, '#00ccff', '#ff6600', '#00ff9d', '#ff33a1'];
 
     // ─── DYNAMIC CONTENT INITIALIZATION ───
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
             // Spawn particles
-            for(let i=0; i<3; i++) {
+            for (let i = 0; i < 3; i++) {
                 particles.push({
                     x: mouse.x, y: mouse.y,
                     vx: (Math.random() - 0.5) * 1.5,
@@ -85,14 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             ctx.clearRect(0, 0, width, height);
 
-            for(let i = 0; i < particles.length; i++) {
+            for (let i = 0; i < particles.length; i++) {
                 let p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life -= 0.02;
                 p.size *= 0.95;
 
-                if(p.life <= 0) {
+                if (p.life <= 0) {
                     particles.splice(i, 1);
                     i--;
                     continue;
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const heroName = document.querySelector('.hero-name');
-        if(heroName) heroName.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+        if (heroName) heroName.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
     });
 
     // ─── SCROLL PROGRESS BAR ───
@@ -229,6 +229,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         preloader.style.display = 'none';
                         activatePage(0);
+                        // Speak "Happy Birthday Damithri!"
+                        setTimeout(() => {
+                            if ('speechSynthesis' in window) {
+                                const msg = new SpeechSynthesisUtterance('Happy Birthday Damithri!');
+                                msg.rate = 0.9;
+                                msg.pitch = 1.2;
+                                msg.volume = 1;
+                                // Try to pick a nice voice
+                                const voices = speechSynthesis.getVoices();
+                                const preferred = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Zira'));
+                                if (preferred) msg.voice = preferred;
+                                speechSynthesis.speak(msg);
+                            }
+                        }, 500);
                     }, 800);
                 }, 400);
             }
@@ -343,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             requestAnimationFrame(animate);
         }
     };
-    const launchFW = (n) => burstConfetti(n * 5);
+    // launchFireworks is defined in v10 enhancements below
 
     // ─── PAGE TRIGGERS ───
     const onPageEnter = (i) => {
@@ -490,8 +504,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start-btn');
     if (startBtn) startBtn.addEventListener('click', () => activatePage(1));
 
-    // ─── COUNTDOWN ───
+    // ─── COUNTDOWN (LIVE — Updates every second) ───
+    let countdownInterval = null;
+    const animNum = (id, val, dur) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const current = parseInt(el.textContent) || 0;
+        if (current === val) return;
+        const start = performance.now();
+        const animate = (now) => {
+            const progress = Math.min((now - start) / dur, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(current + (val - current) * ease);
+            if (progress < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+    };
+
     const startCountdown = () => {
+        if (countdownInterval) clearInterval(countdownInterval);
         const birthDate = new Date(`${CONFIG.birthDate}T00:00:00`);
         const update = () => {
             const now = new Date();
@@ -499,11 +530,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let months = now.getMonth() - birthDate.getMonth();
             let days = now.getDate() - birthDate.getDate();
             let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
             if (days < 0) { months--; days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
             if (months < 0) { years--; months += 12; }
-            animNum('yr', years, 1500); animNum('mo', months, 1200); animNum('dy', days, 1000); animNum('hr', hours, 800);
+            animNum('yr', years, 1500); animNum('mo', months, 1200);
+            animNum('dy', days, 1000); animNum('hr', hours, 800);
+            animNum('mi', minutes, 600); animNum('sc', seconds, 300);
         };
         update();
+        countdownInterval = setInterval(update, 1000);
     };
 
     // ─── CAKE ───
@@ -517,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (m) { m.textContent = '🎉 Wish Granted! ⭐'; m.classList.add('ok'); }
             const mh = document.getElementById('mic-hint');
             if (mh) mh.style.opacity = '0';
-            burstConfetti(120); launchFW(7);
+            burstConfetti(120); launchFireworks();
         }, 700);
     };
 
@@ -537,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const detectBlow = () => {
                     if (blown) return;
                     analyser.getByteFrequencyData(dataArray);
-                    let sum = 0; for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+                    let sum = 0; for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
                     if (sum / dataArray.length > 45) blowCandles();
                     requestAnimationFrame(detectBlow);
                 };
@@ -581,11 +617,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!c) return;
         c.innerHTML = '';
         ['💖', '✨', '🦋', '🌟', '💎'].forEach(e => {
-            for(let i=0; i<3; i++) {
+            for (let i = 0; i < 3; i++) {
                 const d = document.createElement('div');
                 d.className = 'fd'; d.textContent = e;
-                d.style.left = Math.random()*100+'%'; d.style.top = Math.random()*100+'%';
-                d.style.animationDelay = Math.random()*5+'s'; d.style.animationDuration = 6+Math.random()*4+'s';
+                d.style.left = Math.random() * 100 + '%'; d.style.top = Math.random() * 100 + '%';
+                d.style.animationDelay = Math.random() * 5 + 's'; d.style.animationDuration = 6 + Math.random() * 4 + 's';
                 c.appendChild(d);
             }
         });
@@ -633,14 +669,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const angle = (i / items.length) * 360;
             item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
             const img = item.querySelector('img');
-            if (img) item.addEventListener('click', () => { if(!isDrag) { document.getElementById('lb-img').src=img.src; document.getElementById('lightbox').classList.remove('hidden'); playPop(); } });
+            if (img) item.addEventListener('click', () => { if (!isDrag) { document.getElementById('lb-img').src = img.src; document.getElementById('lightbox').classList.remove('hidden'); playPop(); } });
         });
 
         let currDeg = 0, isDrag = false, startX = 0, prevDeg = 0;
         const cont = document.querySelector('.gallery-3d-container');
-        if(cont) {
+        if (cont) {
             cont.addEventListener('mousedown', (e) => { isDrag = true; startX = e.clientX; prevDeg = currDeg; gal.classList.add('grabbing'); });
-            window.addEventListener('mousemove', (e) => { if(isDrag) { currDeg = prevDeg - (e.clientX - startX) * 0.5; gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`; } });
+            window.addEventListener('mousemove', (e) => { if (isDrag) { currDeg = prevDeg - (e.clientX - startX) * 0.5; gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`; } });
             window.addEventListener('mouseup', () => { isDrag = false; gal.classList.remove('grabbing'); });
         }
         const autoRot = () => {
@@ -654,28 +690,32 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     initGallery();
     document.getElementById('lb-close')?.addEventListener('click', () => document.getElementById('lightbox').classList.add('hidden'));
+    // Lightbox keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.getElementById('lightbox')?.classList.add('hidden');
+    });
 
     // ─── BALLOONS ───
     const makeBalloons = () => {
         const arena = document.getElementById('b-arena');
-        if(!arena) return;
+        if (!arena) return;
         arena.innerHTML = '';
         let popCount = 0;
         const score = document.getElementById('b-sc');
-        if(score) score.textContent = '0';
+        if (score) score.textContent = '0';
         document.getElementById('b-prize')?.classList.add('hidden');
 
-        for(let i=0; i<15; i++) {
+        for (let i = 0; i < 15; i++) {
             const b = document.createElement('div');
             b.className = 'balloon';
             b.style.setProperty('--color', COLS[i % COLS.length]);
-            b.style.animationDelay = Math.random() + 's';
-            b.addEventListener('click', function() {
-                if(this.classList.contains('pop')) return;
+            b.style.animationDelay = (Math.random() * 2) + 's';
+            b.addEventListener('click', function () {
+                if (this.classList.contains('pop')) return;
                 this.classList.add('pop'); popCount++; playPop();
-                if(score) score.textContent = popCount;
+                if (score) score.textContent = popCount;
                 burstConfetti(10);
-                if(popCount === 15) { document.getElementById('b-prize').classList.remove('hidden'); playChime(); launchFW(10); }
+                if (popCount === 15) { document.getElementById('b-prize').classList.remove('hidden'); playChime(); launchFireworks(); }
             });
             arena.appendChild(b);
         }
@@ -684,95 +724,98 @@ document.addEventListener('DOMContentLoaded', () => {
     // ─── PUZZLE ───
     const pzDrop = document.getElementById('pz-drop');
     let lp = false, rp = false;
-    const checkWin = () => { if(lp && rp) { document.getElementById('full-h').classList.remove('hidden'); document.getElementById('pz-win').classList.remove('hidden'); burstConfetti(50); playChime(); } };
+    const checkWin = () => { if (lp && rp) { document.getElementById('full-h').classList.remove('hidden'); document.getElementById('pz-win').classList.remove('hidden'); burstConfetti(50); playChime(); } };
 
     ['lh', 'rh'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el) {
             el.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', id));
-            el.addEventListener('click', () => { // Mobile fallback
-                if(id === 'lh' && !lp) { lp=true; el.style.opacity=0; playPop(); }
-                if(id === 'rh' && !rp) { rp=true; el.style.opacity=0; playPop(); }
+            el.addEventListener('click', () => {
+                if (id === 'lh' && !lp) { lp = true; el.style.opacity = 0; playPop(); }
+                if (id === 'rh' && !rp) { rp = true; el.style.opacity = 0; playPop(); }
                 checkWin();
             });
         }
     });
-    if(pzDrop) {
+    if (pzDrop) {
         pzDrop.addEventListener('dragover', e => { e.preventDefault(); pzDrop.classList.add('over'); });
         pzDrop.addEventListener('dragleave', () => pzDrop.classList.remove('over'));
         pzDrop.addEventListener('drop', e => {
             e.preventDefault(); pzDrop.classList.remove('over');
             const id = e.dataTransfer.getData('text');
-            if(id === 'lh' && !lp) { lp=true; document.getElementById('lh').style.opacity=0; playPop(); }
-            if(id === 'rh' && !rp) { rp=true; document.getElementById('rh').style.opacity=0; playPop(); }
+            if (id === 'lh' && !lp) { lp = true; document.getElementById('lh').style.opacity = 0; playPop(); }
+            if (id === 'rh' && !rp) { rp = true; document.getElementById('rh').style.opacity = 0; playPop(); }
             checkWin();
         });
     }
 
     // ─── GIFT ───
     const giftBox = document.getElementById('gift-box');
-    if(giftBox) giftBox.addEventListener('click', function() {
-        if(this.classList.contains('open')) return;
+    if (giftBox) giftBox.addEventListener('click', function () {
+        if (this.classList.contains('open')) return;
         this.classList.add('open');
         document.getElementById('gift-lid').classList.add('open');
-        playChime(); burstConfetti(100); launchFW(5);
-        setTimeout(() => { document.getElementById('gift-w').style.display='none'; document.getElementById('gift-reveal').classList.remove('hidden'); }, 800);
+        playChime(); burstConfetti(100); launchFireworks();
+        setTimeout(() => { document.getElementById('gift-w').style.display = 'none'; document.getElementById('gift-reveal').classList.remove('hidden'); }, 800);
     });
 
     // ─── WISHES ───
     const wishes = document.querySelectorAll('.wish');
     let curW = 0;
     const wDots = document.getElementById('w-dots');
-    if(wDots) wishes.forEach((_, i) => {
-        const d = document.createElement('div'); d.className = `wd ${i===0?'on':''}`;
+    if (wDots) wishes.forEach((_, i) => {
+        const d = document.createElement('div'); d.className = `wd ${i === 0 ? 'on' : ''}`;
         d.addEventListener('click', () => goWish(i)); wDots.appendChild(d);
     });
     const goWish = (i) => {
         wishes.forEach((w, idx) => {
             w.classList.remove('active', 'exit');
-            if(idx === curW && idx !== i) w.classList.add('exit');
-            if(idx === i) setTimeout(() => w.classList.add('active'), 50);
+            if (idx === curW && idx !== i) w.classList.add('exit');
+            if (idx === i) setTimeout(() => w.classList.add('active'), 50);
         });
         curW = i;
-        if(wDots) wDots.querySelectorAll('.wd').forEach((d, idx) => d.classList.toggle('on', idx === i));
+        if (wDots) wDots.querySelectorAll('.wd').forEach((d, idx) => d.classList.toggle('on', idx === i));
     };
     document.getElementById('w-prev')?.addEventListener('click', () => goWish((curW - 1 + wishes.length) % wishes.length));
     document.getElementById('w-next')?.addEventListener('click', () => goWish((curW + 1) % wishes.length));
 
     // ─── SCRATCH ───
     const sc = document.getElementById('scratch-c');
-    if(sc) {
+    if (sc) {
         const ctx = sc.getContext('2d');
-        ctx.fillStyle = '#1a2a45'; ctx.fillRect(0,0,320,120);
-        ctx.fillStyle = '#fff'; ctx.fillText('✨ Scratch Here ✨', 110, 65);
+        ctx.fillStyle = '#1a2a45'; ctx.fillRect(0, 0, 320, 120);
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        ctx.fillText('✨ Scratch Here ✨', 160, 65);
         let scratching = false;
         const scratch = (e) => {
-            if(!scratching) return;
+            if (!scratching) return;
             const r = sc.getBoundingClientRect();
-            const x = (e.touches?e.touches[0].clientX:e.clientX) - r.left;
-            const y = (e.touches?e.touches[0].clientY:e.clientY) - r.top;
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
         };
-        ['mousedown', 'touchstart'].forEach(e => sc.addEventListener(e, () => scratching=true));
+        ['mousedown', 'touchstart'].forEach(e => sc.addEventListener(e, () => scratching = true));
         ['mousemove', 'touchmove'].forEach(e => sc.addEventListener(e, scratch));
-        ['mouseup', 'touchend'].forEach(e => window.addEventListener(e, () => scratching=false));
+        ['mouseup', 'touchend'].forEach(e => window.addEventListener(e, () => scratching = false));
     }
 
     // ─── CERTIFICATE ───
     const sBtn = document.getElementById('sign-btn');
-    if(sBtn) sBtn.addEventListener('click', () => {
-        playChime(); burstConfetti(150); launchFW(8);
+    const certStamp = document.getElementById('cert-stamp');
+    if (sBtn) sBtn.addEventListener('click', () => {
+        playChime(); burstConfetti(150); launchFireworks();
         sBtn.style.display = 'none';
-        document.getElementById('cert-stamp').classList.add('stamped');
+        if (certStamp) { certStamp.classList.remove('hidden'); certStamp.classList.add('stamped'); }
         localStorage.setItem('friend-signed', 'true');
     });
-    if(localStorage.getItem('friend-signed')) { sBtn.style.display='none'; document.getElementById('cert-stamp').classList.add('stamped'); }
+    if (localStorage.getItem('friend-signed') && sBtn) { sBtn.style.display = 'none'; if (certStamp) { certStamp.classList.remove('hidden'); certStamp.classList.add('stamped'); } }
 
     // ─── MEGA BUTTON ───
     const mBtn = document.getElementById('mega-btn');
-    if(mBtn) mBtn.addEventListener('click', () => {
-        playChime(); launchFW(20); burstConfetti(300);
+    if (mBtn) mBtn.addEventListener('click', () => {
+        playChime(); launchFireworks(); burstConfetti(300);
         mBtn.innerHTML = '<span>❤️ FRIENDS FOREVER ❤️</span>';
         mBtn.classList.add('celebrated');
     });
@@ -780,36 +823,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // ─── MEMORY MATCH ───
     let memGameInited = false;
     const initMemoryGame = () => {
-        if(memGameInited) return;
+        if (memGameInited) return;
         const board = document.getElementById('memory-board');
-        if(!board) return;
+        if (!board) return;
         memGameInited = true;
         board.innerHTML = '';
-        const items = ['🍕','🦋','💃','🤣','🎓','💖','🌟','🔥'];
+        const items = ['🍕', '🦋', '💃', '🤣', '🎓', '💖', '🌟', '🔥'];
         const deck = [...items, ...items].sort(() => 0.5 - Math.random());
         let first = null, lock = false, matches = 0;
 
         deck.forEach(item => {
             const card = document.createElement('div');
             card.className = 'memory-card';
-            card.tabIndex = 0; // Accessibility
+            card.tabIndex = 0;
             card.innerHTML = `<div class="memory-face memory-front">${item}</div><div class="memory-face memory-back">❓</div>`;
 
             const flip = () => {
-                if(lock || card === first || card.classList.contains('flipped')) return;
+                if (lock || card === first || card.classList.contains('flipped')) return;
                 card.classList.add('flipped'); playTick();
 
-                if(!first) {
+                if (!first) {
                     first = card;
                 } else {
                     lock = true;
-                    if(first.innerText === card.innerText) {
+                    if (first.innerText === card.innerText) {
                         first.removeEventListener('click', flip);
                         card.removeEventListener('click', flip);
                         first.classList.add('matched'); card.classList.add('matched');
                         first = null; lock = false; matches++; playChime();
-                        if(matches === items.length) {
-                            setTimeout(() => { document.getElementById('memory-win').classList.remove('hidden'); launchFW(10); }, 500);
+                        if (matches === items.length) {
+                            setTimeout(() => { document.getElementById('memory-win').classList.remove('hidden'); launchFireworks(); }, 500);
                         }
                     } else {
                         setTimeout(() => {
@@ -822,10 +865,252 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             card.addEventListener('click', flip);
-            card.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+            card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
             board.appendChild(card);
         });
     };
 
-    console.log(`%c🚀 Damithri's 25th Premium Engine v9.0 Loaded!`, 'color:#00f2ea;font-weight:bold;font-size:14px;background:#000;padding:5px;');
+    // ═══════════════════════════════════════════════════════
+    //  NEW v10 ENHANCEMENTS
+    // ═══════════════════════════════════════════════════════
+
+    // ─── REAL FIREWORKS CANVAS ENGINE ───
+    const initFireworks = () => {
+        const canvas = document.getElementById('fireworks-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let fw = canvas.width = window.innerWidth;
+        let fh = canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { fw = canvas.width = window.innerWidth; fh = canvas.height = window.innerHeight; });
+
+        const rockets = [];
+        const sparks = [];
+
+        class Rocket {
+            constructor() {
+                this.x = Math.random() * fw;
+                this.y = fh;
+                this.targetY = fh * 0.15 + Math.random() * fh * 0.35;
+                this.vy = -(8 + Math.random() * 6);
+                this.color = COLS[Math.floor(Math.random() * COLS.length)];
+                this.trail = [];
+                this.alive = true;
+            }
+            update() {
+                this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+                if (this.trail.length > 8) this.trail.shift();
+                this.y += this.vy;
+                this.vy *= 0.98;
+                if (this.y <= this.targetY || this.vy > -1) {
+                    this.explode();
+                    this.alive = false;
+                }
+            }
+            explode() {
+                const count = 60 + Math.floor(Math.random() * 40);
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+                    const speed = 2 + Math.random() * 5;
+                    sparks.push({
+                        x: this.x, y: this.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: this.color,
+                        alpha: 1,
+                        decay: 0.015 + Math.random() * 0.01,
+                        size: 1.5 + Math.random() * 1.5
+                    });
+                }
+                playPop();
+            }
+            draw() {
+                this.trail.forEach((t, i) => {
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = (i / this.trail.length) * 0.5;
+                    ctx.fill();
+                    t.alpha -= 0.1;
+                });
+                ctx.globalAlpha = 1;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+        }
+
+        const animateFW = () => {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(0, 0, fw, fh);
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (let i = rockets.length - 1; i >= 0; i--) {
+                rockets[i].update();
+                rockets[i].draw();
+                if (!rockets[i].alive) rockets.splice(i, 1);
+            }
+            for (let i = sparks.length - 1; i >= 0; i--) {
+                const s = sparks[i];
+                s.x += s.vx;
+                s.y += s.vy;
+                s.vy += 0.06; // gravity
+                s.vx *= 0.99;
+                s.alpha -= s.decay;
+                if (s.alpha <= 0) { sparks.splice(i, 1); continue; }
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fillStyle = s.color;
+                ctx.globalAlpha = s.alpha;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+            requestAnimationFrame(animateFW);
+        };
+        animateFW();
+
+        // Expose launcher
+        window._launchRocket = () => { rockets.push(new Rocket()); };
+    };
+    initFireworks();
+
+    const launchFireworks = () => {
+        if (!window._launchRocket) return;
+        for (let i = 0; i < 7; i++) {
+            setTimeout(() => window._launchRocket(), i * 300);
+        }
+    };
+
+    // ─── THEME SWITCHER ───
+    const themes = ['neon', 'warm', 'pastel'];
+    let currentTheme = localStorage.getItem('bday-theme') || 'neon';
+    const applyTheme = (theme) => {
+        if (theme === 'neon') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        document.body.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg');
+        currentTheme = theme;
+        localStorage.setItem('bday-theme', theme);
+    };
+    applyTheme(currentTheme);
+    const themeBtn = document.getElementById('theme-btn');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const idx = (themes.indexOf(currentTheme) + 1) % themes.length;
+            applyTheme(themes[idx]);
+            playTick();
+            burstConfetti(15);
+        });
+    }
+
+    // ─── AMBIENT FLOATING PARTICLES ───
+    const initAmbientParticles = () => {
+        const layer = document.getElementById('ambient-layer');
+        if (!layer) return;
+        const emojis = ['💖', '✨', '⭐', '🦋', '💫', '🌸', '�'];
+        const spawn = () => {
+            if (document.hidden) return;
+            const p = document.createElement('div');
+            p.className = 'ambient-particle';
+            p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            p.style.left = Math.random() * 100 + '%';
+            p.style.fontSize = (0.6 + Math.random() * 1) + 'rem';
+            const duration = 12 + Math.random() * 10;
+            p.style.animationDuration = duration + 's';
+            p.style.animationDelay = Math.random() * 2 + 's';
+            layer.appendChild(p);
+            setTimeout(() => p.remove(), (duration + 2) * 1000);
+        };
+        // Spawn initial burst
+        for (let i = 0; i < 8; i++) setTimeout(spawn, i * 500);
+        // Continuous spawn
+        setInterval(() => { if (layer.children.length < 20) spawn(); }, 2000);
+    };
+    initAmbientParticles();
+
+    // ─── KONAMI CODE EASTER EGG ───
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    document.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                konamiIndex = 0;
+                // Easter egg activated!
+                const msg = document.createElement('div');
+                msg.id = 'konami-msg';
+                msg.innerHTML = `
+                    <h2>🎉 SECRET UNLOCKED! 🎉</h2>
+                    <p>You found the hidden message!</p>
+                    <p style="font-size: 2rem;">Damithri, you are absolutely LEGENDARY! 🏆👑✨</p>
+                    <p>— Your Friend Forever 💖</p>
+                    <button class="cta" onclick="this.parentElement.remove()" style="margin-top:20px;">
+                        <span>Close 💫</span>
+                    </button>
+                `;
+                document.body.appendChild(msg);
+                burstConfetti(300);
+                launchFireworks();
+                playChime();
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    // ─── PHOTO UPLOAD FOR GALLERY ───
+    const initPhotoUpload = () => {
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('photo-upload');
+        if (!uploadArea || !fileInput) return;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--c)'; });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault(); uploadArea.style.borderColor = '';
+            if (e.dataTransfer.files.length) handlePhotoUpload(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) handlePhotoUpload(fileInput.files[0]); });
+
+        const handlePhotoUpload = (file) => {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photos = JSON.parse(localStorage.getItem('gallery-photos') || '[]');
+                if (photos.length >= 5) { photos.shift(); } // Keep max 5
+                photos.push(e.target.result);
+                localStorage.setItem('gallery-photos', JSON.stringify(photos));
+                addPhotoToGallery(e.target.result);
+                playPop(); burstConfetti(20);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        const addPhotoToGallery = (src) => {
+            const gal = document.querySelector('.gallery-3d');
+            if (!gal) return;
+            const item = document.createElement('div');
+            item.className = 'g3d-item';
+            item.innerHTML = `<img src="${src}" alt="Uploaded Memory">`;
+            gal.appendChild(item);
+            // Re-layout gallery items
+            const items = gal.querySelectorAll('.g3d-item');
+            items.forEach((it, i) => {
+                const angle = (i / items.length) * 360;
+                it.style.transform = `rotateY(${angle}deg) translateZ(350px)`;
+            });
+        };
+
+        // Load saved photos
+        const savedPhotos = JSON.parse(localStorage.getItem('gallery-photos') || '[]');
+        savedPhotos.forEach(src => addPhotoToGallery(src));
+    };
+    initPhotoUpload();
+
+    console.log(`%c🚀 Damithri's 25th Premium Engine v10.0 — MEGA ENHANCED! ✨`, 'color:#00f2ea;font-weight:bold;font-size:14px;background:#000;padding:8px;border-radius:5px;');
 });
