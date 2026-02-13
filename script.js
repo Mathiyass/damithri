@@ -1,11 +1,53 @@
 /* ╔══════════════════════════════════════════════════════════════╗
-   ║  DAMITHRI'S 25TH — ULTRA PREMIUM ENGINE v6 (FULL ENHANCED) ║
+   ║  DAMITHRI'S 25TH — ULTRA PREMIUM ENGINE v7 (FULL ENHANCED) ║
    ╚══════════════════════════════════════════════════════════════╝ */
+
+const CONFIG = {
+    name: "Damithri",
+    nickname: "Friend",
+    age: 25,
+    birthDate: "2001-02-14", // YYYY-MM-DD
+    themeColors: {
+        primary: '#00FFDE',
+        secondary: '#FF0055',
+        accent: '#FFD700',
+        soft: '#FF69B4',
+        deep: '#A855F7'
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // ─── CONSTANTS & CONFIG ───
-    const C = '#00FFDE', R = '#FF0055', G = '#FFD700', PK = '#FF69B4', PU = '#A855F7';
+    const C = CONFIG.themeColors.primary,
+          R = CONFIG.themeColors.secondary,
+          G = CONFIG.themeColors.accent,
+          PK = CONFIG.themeColors.soft,
+          PU = CONFIG.themeColors.deep;
     const COLS = [C, R, G, PK, PU, '#00CCFF', '#FF6600', '#33FF88', '#FF33A1'];
+
+    // ─── DYNAMIC CONTENT INITIALIZATION ───
+    const initContent = () => {
+        // Update Name
+        document.querySelectorAll('.hero-name, .fin-name').forEach(el => el.textContent = CONFIG.name);
+        document.querySelectorAll('.cake-l.ct span').forEach(el => el.textContent = CONFIG.name);
+
+        // Update Age
+        document.querySelectorAll('.ht2').forEach(el => {
+            el.innerHTML = `${CONFIG.age}<sup>th</sup>`;
+            el.setAttribute('data-text', `${CONFIG.age}th`);
+        });
+        document.querySelectorAll('.age-ring span').forEach(el => el.textContent = CONFIG.age);
+
+        // Update Date Badge
+        const dateObj = new Date(CONFIG.birthDate);
+        const month = dateObj.toLocaleString('default', { month: 'long' });
+        const day = dateObj.getDate();
+        document.querySelector('.badge.el').textContent = `✨ ${month} ${day}, ${new Date().getFullYear()} ✨`;
+
+        // Update Countdown Target
+        // (Handled in startCountdown, but we need to pass the date)
+    };
+    initContent();
 
     // ─── STAR FIELD CANVAS ───
     const initStarField = () => {
@@ -22,13 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', resize);
 
         // Create stars
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < 200; i++) {
             stars.push({
                 x: Math.random() * w,
                 y: Math.random() * h,
                 r: Math.random() * 1.5 + 0.3,
                 alpha: Math.random(),
-                speed: Math.random() * 0.02 + 0.005,
+                twinkle: Math.random() * 0.02 + 0.005,
                 dir: Math.random() > 0.5 ? 1 : -1
             });
         }
@@ -36,20 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const drawStars = () => {
             ctx.clearRect(0, 0, w, h);
             stars.forEach(s => {
-                s.alpha += s.speed * s.dir;
+                s.alpha += s.twinkle * s.dir;
                 if (s.alpha >= 1) { s.alpha = 1; s.dir = -1; }
                 if (s.alpha <= 0.1) { s.alpha = 0.1; s.dir = 1; }
 
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha * 0.6})`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha * 0.8})`;
                 ctx.fill();
 
                 // Star glow
                 if (s.r > 1) {
                     ctx.beginPath();
                     ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(0, 255, 222, ${s.alpha * 0.08})`;
+                    ctx.fillStyle = `rgba(${CONFIG.themeColors.primary === '#00FFDE' ? '0, 255, 222' : '255, 255, 255'}, ${s.alpha * 0.15})`;
                     ctx.fill();
                 }
             });
@@ -63,12 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const cursorGlow = document.getElementById('cursor-glow');
     if (cursorGlow) {
         let mouseX = 0, mouseY = 0;
+        let ticking = false;
+
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
-            cursorGlow.style.left = mouseX + 'px';
-            cursorGlow.style.top = mouseY + 'px';
-            cursorGlow.style.opacity = '1';
+
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    cursorGlow.style.left = mouseX + 'px';
+                    cursorGlow.style.top = mouseY + 'px';
+                    cursorGlow.style.opacity = '1';
+                    ticking = false;
+                });
+                ticking = true;
+            }
         });
         document.addEventListener('mouseleave', () => {
             cursorGlow.style.opacity = '0';
@@ -153,16 +204,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playTone = (freq, type, dur) => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        const t = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        osc.type = type;
-        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-        osc.connect(gain);
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.frequency.setValueAtTime(freq, t);
+        osc.type = type === 'sine' ? 'triangle' : type; // Enrich sine waves
+
+        // Lowpass filter to soften the harsh edges
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(Math.min(22000, freq * 4), t);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(100, freq), t + dur);
+
+        // ADSR Envelope (Attack, Decay, Sustain, Release)
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.exponentialRampToValueAtTime(0.4, t + 0.04); // Attack
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur); // Release
+
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(masterGain);
-        osc.start();
-        osc.stop(audioCtx.currentTime + dur);
+
+        osc.start(t);
+        osc.stop(t + dur);
     };
 
     const playTick = () => playTone(800, 'sine', 0.05);
@@ -453,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ─── LIVE COUNTDOWN ───
     const startCountdown = () => {
-        const birthDate = new Date('2001-02-14T00:00:00');
+        const birthDate = new Date(`${CONFIG.birthDate}T00:00:00`);
         const update = () => {
             const now = new Date();
             let years = now.getFullYear() - birthDate.getFullYear();
@@ -493,10 +558,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 m.textContent = '🎉 Your wish is commanded to the stars! ⭐';
                 m.classList.add('ok');
             }
+            const mh = document.getElementById('mic-hint');
+            if (mh) mh.style.opacity = '0';
+
             burstConfetti(120);
             launchFW(7);
         }, 700);
     };
+
+    // Microphone Logic
+    const initMicrophone = async () => {
+        try {
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const microphone = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            microphone.connect(analyser);
+
+            const micBtn = document.getElementById('mic-btn');
+            if (micBtn) {
+                micBtn.innerHTML = '<span>🎤 Listening... Blow!</span>';
+                micBtn.style.background = 'rgba(255, 0, 85, 0.2)';
+                micBtn.disabled = true;
+            }
+
+            const detectBlow = () => {
+                if (blown) return;
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for(let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+
+                // Threshold for blowing
+                if (average > 45) {
+                    blowCandles();
+                }
+                requestAnimationFrame(detectBlow);
+            };
+            detectBlow();
+        } catch (err) {
+            console.error('Microphone error:', err);
+            const micBtn = document.getElementById('mic-btn');
+            if (micBtn) micBtn.innerHTML = '<span>⚠️ Mic Blocked</span>';
+        }
+    };
+
+    const micBtn = document.getElementById('mic-btn');
+    if (micBtn) micBtn.addEventListener('click', initMicrophone);
 
     const blowBtn = document.getElementById('blow-btn');
     if (blowBtn) blowBtn.addEventListener('click', blowCandles);
@@ -736,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bArena = document.getElementById('b-arena');
     const bScore = document.getElementById('b-sc');
     const bPrize = document.getElementById('b-prize');
-    const bTexts = ['Bestie!', 'Love!', 'Joy!', '25!', 'Gift!', 'Hugs!', 'Pizza!', 'Travel!', 'Laughs!', 'Secrets!', 'Party!', 'Dreams!', 'Shine!', 'Win!', 'Forever!'];
+    const bTexts = ['Friend!', 'Love!', 'Joy!', '25!', 'Gift!', 'Hugs!', 'Pizza!', 'Travel!', 'Laughs!', 'Secrets!', 'Party!', 'Dreams!', 'Shine!', 'Win!', 'Forever!'];
     let popCount = 0;
 
     const makeBalloons = () => {
@@ -985,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['mouseup', 'touchend'].forEach(ev => window.addEventListener(ev, () => scratching = false));
     };
 
-    // ─── BESTIE CERTIFICATE ───
+    // ─── FRIEND CERTIFICATE ───
     const signBtn = document.getElementById('sign-btn');
     const certStamp = document.getElementById('cert-stamp');
     if (signBtn && certStamp) {
@@ -999,10 +1112,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 certStamp.classList.remove('hidden');
                 setTimeout(() => certStamp.classList.add('stamped'), 50);
             }, 300);
-            localStorage.setItem('bestie-signed', 'true');
+            localStorage.setItem('friend-signed', 'true');
         });
 
-        if (localStorage.getItem('bestie-signed') === 'true') {
+        if (localStorage.getItem('friend-signed') === 'true') {
             signBtn.style.display = 'none';
             certStamp.classList.remove('hidden');
             certStamp.classList.add('stamped');
@@ -1017,7 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             launchFW(15);
             burstConfetti(250);
             emojiRain();
-            megaBtn.innerHTML = '<span>🍻 Besties Forever! 🍻</span>';
+            megaBtn.innerHTML = '<span>🍻 Friends Forever! 🍻</span>';
             megaBtn.classList.add('celebrated');
         });
     }
@@ -1025,5 +1138,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init Scratch
     initScratch();
 
-    console.log(`%c🚀 Damithri's 25th Premium Engine v6 Loaded!`, 'color:#00FFDE;font-weight:bold;font-size:16px;background:#000;padding:4px 12px;border-radius:4px;');
+    console.log(`%c🚀 Damithri's 25th Premium Engine v7 Loaded!`, 'color:#00FFDE;font-weight:bold;font-size:16px;background:#000;padding:4px 12px;border-radius:4px;');
 });

@@ -3083,7 +3083,13 @@ body::before {
     justify-content: center;
     transition: all 0.5s;
     backface-visibility: hidden;
-    /* optional, but good for performance */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.g3d-item:hover {
+    box-shadow: 0 0 35px rgba(0, 255, 222, 0.4);
+    border-color: var(--c);
+    transform: scale(1.05) translateZ(20px);
 }
 
 .g3d-item img {
@@ -3091,6 +3097,11 @@ body::before {
     height: 100%;
     object-fit: cover;
     pointer-events: none;
+    transition: transform 0.5s;
+}
+
+.g3d-item:hover img {
+    transform: scale(1.1);
 }
 
 .g3d-ph {
@@ -3215,7 +3226,7 @@ body::before {
     }
 }
 
-/* ─── BESTIE CERTIFICATE ─── */
+/* ─── FRIEND CERTIFICATE ─── */
 .certificate {
     max-width: 520px;
     margin: 30px auto;
