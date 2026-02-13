@@ -5,13 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🎂 Happy 25th Birthday Damithri! 🎉</title>
-    <meta name="description" content="A magical, interactive 25th birthday celebration website for Damithri. Creating memories that last forever!">
+    <meta name="description"
+        content="A magical, interactive 25th birthday celebration website for Damithri. Creating memories that last forever!">
     <meta property="og:title" content="Happy 25th Birthday Damithri! 🎂">
-    <meta property="og:description" content="Join the celebration! A special interactive experience for a special person.">
+    <meta property="og:description"
+        content="Join the celebration! A special interactive experience for a special person.">
     <meta property="og:image" content="https://ui-avatars.com/api/?name=Damithri&background=0D8ABC&color=fff&size=512">
     <meta property="og:url" content="https://damithri25.github.io/">
     <meta property="og:type" content="website">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -22,15 +25,34 @@
 
 <body>
 
-    <!-- PRELOADER -->
+    <!-- UI OVERLAY ELEMENTS -->
+    <div id="scroll-progress"></div>
+    <div id="cursor-glow"></div>
+
+    <!-- PRELOADER - SIGNATURE ANIMATION -->
     <div id="preloader">
-        <div class="pl-inner">
-            <div class="pl-ring"></div>
-            <div class="pl-ring"></div>
-            <div class="pl-ring"></div>
-            <div class="pl-heart">💖</div>
+        <div class="sig-container">
+            <svg class="sig-svg" viewBox="0 0 400 200" width="300" height="150">
+                <defs>
+                    <linearGradient id="sig-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#00FFDE;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#fff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FF0055;stop-opacity:1" />
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+                <!-- Path for "Damithri" (Stylized Signature) -->
+                <path id="sig-path"
+                    d="M30 150 C 30 150, 50 50, 80 50 C 100 50, 100 150, 80 150 C 60 150, 60 80, 100 80 C 140 80, 120 150, 140 150 C 160 150, 160 100, 180 100 C 200 100, 200 150, 220 150 C 240 150, 240 80, 260 80 C 280 80, 280 150, 300 150 C 320 150, 320 50, 340 50 C 360 50, 360 150, 380 150"
+                    fill="none" stroke="url(#sig-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                    filter="url(#glow)" stroke-dasharray="1000" stroke-dashoffset="1000" />
+            </svg>
+            <div id="pen-tip" class="pen-tip"></div>
         </div>
-        <p class="pl-text">Creating magic for Damithri...</p>
+        <p class="pl-text">Handcrafting magic for Damithri...</p>
         <div class="pl-bar-wrap">
             <div class="pl-bar"></div>
         </div>
@@ -78,7 +100,7 @@
     <main id="pages">
 
         <!-- 0: HERO -->
-        <section class="pg" id="pg-hero" data-anim="zoom">
+        <section class="pg active" id="pg-hero" data-anim="zoom">
             <div class="gradient-mesh m1"></div>
             <div class="orbs">
                 <div class="orb o1"></div>
@@ -331,7 +353,9 @@
                         <!-- Images will be injected by JS or placeholders used -->
                         <!-- Using the one existing image and placeholders -->
                         <div class="g3d-item"><img src="img/622801959_17845870185673653_431096063676591540_n.jpg"
-                                alt="Memory" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Bestie&background=ff003c&color=fff&size=200';"></div>
+                                alt="Memory"
+                                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Bestie&background=ff003c&color=fff&size=200';">
+                        </div>
                         <div class="g3d-item">
                             <div class="g3d-ph"><span>🦋</span>
                                 <p>Pure Joy</p>
@@ -382,7 +406,8 @@
                 <div class="gb-form glass el">
                     <textarea id="gb-msg" placeholder="Write something sweet (or funny!)..." maxlength="140"></textarea>
                     <button id="gb-btn" class="cta small"><span>🖊️ Sign It</span></button>
-                    <p class="hint" style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7;">(Note: Messages are saved locally on your device!)</p>
+                    <p class="hint" style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7;">(Note: Messages are saved
+                        locally on your device!)</p>
                 </div>
                 <div class="gb-board el" id="gb-board">
                     <!-- Messages appear here -->

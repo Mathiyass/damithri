@@ -1,41 +1,308 @@
 /* ╔══════════════════════════════════════════════════════════════╗
-   ║  DAMITHRI'S 25TH — PREMIUM ENGINE v5 (ENHANCED)            ║
+   ║  DAMITHRI'S 25TH — ULTRA PREMIUM ENGINE v6 (FULL ENHANCED) ║
    ╚══════════════════════════════════════════════════════════════╝ */
 
 document.addEventListener('DOMContentLoaded', () => {
     // ─── CONSTANTS & CONFIG ───
-    const C = '#00FFDE', R = '#FF003C', G = '#FFD700', PK = '#FF69B4', PU = '#A855F7';
+    const C = '#00FFDE', R = '#FF0055', G = '#FFD700', PK = '#FF69B4', PU = '#A855F7';
     const COLS = [C, R, G, PK, PU, '#00CCFF', '#FF6600', '#33FF88', '#FF33A1'];
 
-    // ─── PRELOADER ───
-    const plBar = document.querySelector('.pl-bar');
-    const plPct = document.getElementById('pl-pct');
-    let pctVal = 0;
+    // ─── STAR FIELD CANVAS ───
+    const initStarField = () => {
+        const canvas = document.getElementById('stars-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let w, h, stars = [];
 
-    const pctInt = setInterval(() => {
-        pctVal += Math.random() * 8 + 2;
-        if (pctVal >= 100) { pctVal = 100; clearInterval(pctInt); }
-        if (plPct) plPct.textContent = Math.floor(pctVal) + '%';
-        if (plBar) plBar.style.width = Math.floor(pctVal) + '%';
-    }, 100);
+        const resize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Create stars
+        for (let i = 0; i < 150; i++) {
+            stars.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: Math.random() * 1.5 + 0.3,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02 + 0.005,
+                dir: Math.random() > 0.5 ? 1 : -1
+            });
+        }
+
+        const drawStars = () => {
+            ctx.clearRect(0, 0, w, h);
+            stars.forEach(s => {
+                s.alpha += s.speed * s.dir;
+                if (s.alpha >= 1) { s.alpha = 1; s.dir = -1; }
+                if (s.alpha <= 0.1) { s.alpha = 0.1; s.dir = 1; }
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha * 0.6})`;
+                ctx.fill();
+
+                // Star glow
+                if (s.r > 1) {
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 255, 222, ${s.alpha * 0.08})`;
+                    ctx.fill();
+                }
+            });
+            requestAnimationFrame(drawStars);
+        };
+        drawStars();
+    };
+    initStarField();
+
+    // ─── CURSOR GLOW FOLLOWER ───
+    const cursorGlow = document.getElementById('cursor-glow');
+    if (cursorGlow) {
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorGlow.style.left = mouseX + 'px';
+            cursorGlow.style.top = mouseY + 'px';
+            cursorGlow.style.opacity = '1';
+        });
+        document.addEventListener('mouseleave', () => {
+            cursorGlow.style.opacity = '0';
+        });
+    }
+
+    // ─── SCROLL PROGRESS BAR ───
+    const scrollProgress = document.getElementById('scroll-progress');
+    const updateScrollProgress = (pageIdx, totalPages) => {
+        if (!scrollProgress) return;
+        const pct = ((pageIdx + 1) / totalPages) * 100;
+        scrollProgress.style.width = pct + '%';
+    };
+
+    // ─── PRELOADER: SIGNATURE ANIMATION ───
+    const initSignature = () => {
+        const path = document.getElementById('sig-path');
+        const penTip = document.getElementById('pen-tip');
+        const preloader = document.getElementById('preloader');
+
+        if (!path || !preloader) return;
+
+        const len = path.getTotalLength();
+        path.style.strokeDasharray = len;
+        path.style.strokeDashoffset = len;
+
+        let start = null;
+        const dur = 3500;
+
+        const step = (ts) => {
+            if (!start) start = ts;
+            const prog = Math.min((ts - start) / dur, 1);
+            const ease = 1 - Math.pow(1 - prog, 3);
+
+            const currentOffset = len * (1 - ease);
+            path.style.strokeDashoffset = currentOffset;
+
+            if (penTip) {
+                try {
+                    const point = path.getPointAtLength(len * ease);
+                    const svg = path.closest('svg');
+                    const svgRect = svg.getBoundingClientRect();
+                    const viewBox = svg.viewBox.baseVal;
+                    const scaleX = svgRect.width / viewBox.width;
+                    const scaleY = svgRect.height / viewBox.height;
+                    penTip.style.left = (svgRect.left - svg.parentElement.getBoundingClientRect().left + point.x * scaleX) + 'px';
+                    penTip.style.top = (svgRect.top - svg.parentElement.getBoundingClientRect().top + point.y * scaleY) + 'px';
+                    penTip.style.opacity = prog < 0.95 ? 1 : 0;
+                } catch (e) { }
+            }
+
+            const plBar = document.querySelector('.pl-bar');
+            const plPct = document.getElementById('pl-pct');
+            if (plBar) plBar.style.width = (ease * 100) + '%';
+            if (plPct) plPct.textContent = Math.floor(ease * 100) + '%';
+
+            if (prog < 1) {
+                requestAnimationFrame(step);
+            } else {
+                setTimeout(() => {
+                    preloader.classList.add('out');
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                        activatePage(0);
+                    }, 1000);
+                }, 500);
+            }
+        };
+
+        requestAnimationFrame(step);
+    };
 
     window.addEventListener('load', () => {
-        setTimeout(() => {
-            const p = document.getElementById('preloader');
-            if (p) {
-                p.classList.add('out');
-                setTimeout(() => {
-                    p.style.display = 'none';
-                    activatePage(0);
-                }, 900);
-            }
-        }, 2200);
+        setTimeout(initSignature, 500);
     });
 
-    // ─── PAGE NAVIGATION ───
+    // ─── AUDIO SYSTEM ───
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.3;
+    masterGain.connect(audioCtx.destination);
+
+    const playTone = (freq, type, dur) => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.type = type;
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+    };
+
+    const playTick = () => playTone(800, 'sine', 0.05);
+    const playChime = () => {
+        playTone(600, 'sine', 1);
+        setTimeout(() => playTone(800, 'sine', 1), 100);
+        setTimeout(() => playTone(1200, 'sine', 1.5), 200);
+    };
+    const playPop = () => playTone(300, 'triangle', 0.1);
+    const playWhoosh = () => playTone(200, 'sine', 0.15);
+
+    // ─── CONFETTI SYSTEM (PHYSICS-ENHANCED) ───
+    const burstConfetti = (n) => {
+        for (let i = 0; i < n; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            const color = COLS[Math.floor(Math.random() * COLS.length)];
+            const size = Math.random() * 8 + 4;
+            const isCircle = Math.random() > 0.5;
+            Object.assign(c.style, {
+                left: '50%', top: '50%',
+                backgroundColor: color,
+                width: size + 'px',
+                height: isCircle ? size + 'px' : (size * 0.6) + 'px',
+                borderRadius: isCircle ? '50%' : '2px',
+                position: 'fixed', zIndex: '9999',
+                transition: `all ${0.8 + Math.random() * 0.6}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
+                boxShadow: `0 0 ${size}px ${color}40`
+            });
+            document.body.appendChild(c);
+
+            const x = (Math.random() - 0.5) * window.innerWidth * 1.2;
+            const y = (Math.random() - 1.2) * window.innerHeight;
+            const rot = Math.random() * 1080;
+
+            requestAnimationFrame(() => {
+                c.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+                c.style.opacity = 0;
+            });
+            setTimeout(() => c.remove(), 1500);
+        }
+    };
+    const launchFW = (n) => burstConfetti(n * 3);
+
+    // ─── PAGE TRIGGERS ───
+    const onPageEnter = (i) => {
+        const pg = document.querySelectorAll('.pg')[i];
+        if (!pg) return;
+        const id = pg.id;
+
+        if (id === 'pg-bal') makeBalloons();
+        if (id === 'pg-tw') goTW(0);
+        if (id === 'pg-guest') loadGuestbook();
+        if (id === 'pg-count') startCountdown();
+        if (id === 'pg-tw') spawnFloatingDecos();
+    };
+
+    // ─── 3D TILT EFFECT ───
+    const tiltCards = document.querySelectorAll('.glass, .cnt-card');
+
+    const handleTilt = (e) => {
+        const el = e.currentTarget;
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -8;
+        const rotateY = ((x - centerX) / centerX) * 8;
+        el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    };
+
+    const resetTilt = (e) => {
+        e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    };
+
+    tiltCards.forEach(card => {
+        card.addEventListener('mousemove', handleTilt);
+        card.addEventListener('mouseleave', resetTilt);
+    });
+
+    // ─── MAGNETIC BUTTONS ───
+    const magBtns = document.querySelectorAll('.ui-btn, .cta, .dot');
+    magBtns.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px) scale(1.1)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translate(0, 0) scale(1)';
+        });
+    });
+
+    // ─── AMBIENT LIFE: SHOOTING STARS ───
+    const spawnShootingStar = () => {
+        const s = document.createElement('div');
+        s.className = 'shooting-star';
+        s.style.top = Math.random() * 40 + '%';
+        s.style.left = Math.random() * 90 + '%';
+        s.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 4000);
+    };
+    setInterval(spawnShootingStar, 3000);
+
+    // ─── INTERACTIVE TYPOGRAPHY: HACKER TEXT ───
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const scrambleText = (el) => {
+        if (el.dataset.animating === "true") return;
+        el.dataset.animating = "true";
+        const original = el.innerText;
+        let iteration = 0;
+        const interval = setInterval(() => {
+            el.innerText = original
+                .split("")
+                .map((letter, index) => {
+                    if (index < iteration) return original[index];
+                    return letters[Math.floor(Math.random() * 36)];
+                })
+                .join("");
+
+            if (iteration >= original.length) {
+                clearInterval(interval);
+                el.dataset.animating = "false";
+            }
+            iteration += 1 / 3;
+        }, 30);
+    };
+
+    document.querySelectorAll('.sec-title, .badge').forEach(h => {
+        h.addEventListener('mouseover', () => {
+            if (h.children.length === 0) scrambleText(h);
+        });
+    });
+
+    // ─── PAGE NAVIGATION (CINEMATIC CUBE) ───
     const pages = document.querySelectorAll('.pg');
     const dots = document.querySelectorAll('.dot');
-    const trans = document.getElementById('trans');
     const pgCur = document.getElementById('pg-cur');
     const arrUp = document.getElementById('arr-up');
     const arrDn = document.getElementById('arr-dn');
@@ -44,347 +311,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const activatePage = (idx) => {
         if (idx < 0 || idx >= pages.length || busy) return;
+        if (idx === cur && pages[cur].classList.contains('active')) return;
         busy = true;
+        playWhoosh();
 
-        if (trans && cur !== idx) {
-            trans.className = 'wipe-in';
-            setTimeout(() => {
-                doSwitch(idx);
-                trans.className = 'wipe-out';
-                setTimeout(() => { trans.className = ''; busy = false; }, 400);
-            }, 350);
-        } else {
-            doSwitch(idx);
-            setTimeout(() => busy = false, 500);
+        const dir = idx > cur ? 'down' : 'up';
+        const next = pages[idx];
+        const current = pages[cur];
+
+        // Apply animation classes
+        if (current !== next) {
+            current.classList.add(dir === 'down' ? 'cube-out-up' : 'cube-out-down');
         }
+        next.classList.add(dir === 'down' ? 'cube-in-up' : 'cube-in-down');
+        next.classList.add('active');
+
+        setTimeout(() => {
+            if (current !== next) {
+                current.classList.remove('active', 'cube-out-up', 'cube-out-down');
+            }
+            next.classList.remove('cube-in-up', 'cube-in-down');
+
+            cur = idx;
+            busy = false;
+
+            // Stagger entrance animations
+            const els = next.querySelectorAll('.el');
+            els.forEach((el, k) => {
+                el.classList.remove('show');
+                setTimeout(() => el.classList.add('show'), 80 + k * 90);
+            });
+
+            updateUI(cur);
+            onPageEnter(cur);
+            updateScrollProgress(cur, pages.length);
+        }, 1200);
     };
 
-    const doSwitch = (idx) => {
-        // Deactivate old
-        if (pages[cur]) {
-            pages[cur].classList.remove('active');
-            const oldEls = pages[cur].querySelectorAll('.el');
-            oldEls.forEach(el => el.classList.remove('show'));
-        }
-        cur = idx;
-        // Activate new
-        const pg = pages[cur];
-        if (!pg) return;
-        const anim = pg.getAttribute('data-anim') || 'fade';
-        pg.className = `pg active anim-${anim}`;
-
-        // Update counter
-        if (pgCur) pgCur.textContent = String(cur + 1).padStart(2, '0');
-        // Update dots
+    const updateUI = (c) => {
+        if (pgCur) pgCur.textContent = String(c + 1).padStart(2, '0');
         dots.forEach((dot, j) => {
-            dot.classList.toggle('active', j === cur);
+            dot.classList.toggle('active', j === c);
         });
-        // Arrows
-        if (arrUp) arrUp.disabled = (cur === 0);
-        if (arrDn) arrDn.disabled = (cur === pages.length - 1);
-
-        // Stagger entrance
-        const els = pg.querySelectorAll('.el');
-        els.forEach((el, k) => {
-            setTimeout(() => el.classList.add('show'), 80 + k * 140);
-        });
-
-        // Page triggers
-        onPageEnter(cur);
-        playTick();
+        if (arrUp) arrUp.disabled = (c === 0);
+        if (arrDn) arrDn.disabled = (c === pages.length - 1);
     };
 
-    // Keyboard Nav
+    // Initial page activation
+    setTimeout(() => {
+        const els = pages[0].querySelectorAll('.el');
+        els.forEach((el, k) => setTimeout(() => el.classList.add('show'), 100 + k * 100));
+        updateUI(0);
+        updateScrollProgress(0, pages.length);
+        playTick();
+    }, 1000);
+
+    // Scroll / Wheel Navigation
+    let scrollCooldown = false;
+    document.addEventListener('wheel', (e) => {
+        if (scrollCooldown || busy) return;
+        scrollCooldown = true;
+        if (e.deltaY > 0 && cur < pages.length - 1) activatePage(cur + 1);
+        else if (e.deltaY < 0 && cur > 0) activatePage(cur - 1);
+        setTimeout(() => scrollCooldown = false, 1500);
+    }, { passive: true });
+
+    // Touch Navigation
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+        if (busy) return;
+        const diff = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(diff) > 60) {
+            if (diff > 0 && cur < pages.length - 1) activatePage(cur + 1);
+            else if (diff < 0 && cur > 0) activatePage(cur - 1);
+        }
+    });
+
+    // Keyboard Navigation
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        if (busy) return;
+        if (['ArrowDown', 'PageDown', ' '].includes(e.key) && cur < pages.length - 1) {
             e.preventDefault(); activatePage(cur + 1);
-        } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        } else if (['ArrowUp', 'PageUp'].includes(e.key) && cur > 0) {
             e.preventDefault(); activatePage(cur - 1);
         }
     });
 
-    // Wheel Nav
-    let wheelLock = false;
-    window.addEventListener('wheel', (e) => {
-        if (wheelLock) return;
-        wheelLock = true;
-        setTimeout(() => wheelLock = false, 900);
-        if (e.deltaY > 25) activatePage(cur + 1);
-        else if (e.deltaY < -25) activatePage(cur - 1);
-    }, { passive: true });
+    // Arrow Buttons
+    if (arrUp) arrUp.addEventListener('click', () => { if (cur > 0) activatePage(cur - 1); });
+    if (arrDn) arrDn.addEventListener('click', () => { if (cur < pages.length - 1) activatePage(cur + 1); });
 
-    // Touch Swipe
-    let touchY = 0;
-    window.addEventListener('touchstart', (e) => { touchY = e.touches[0].clientY; }, { passive: true });
-    window.addEventListener('touchend', (e) => {
-        const diff = touchY - e.changedTouches[0].clientY;
-        if (Math.abs(diff) > 55) {
-            if (diff > 0) activatePage(cur + 1);
-            else activatePage(cur - 1);
-        }
-    });
-
-    // Nav Dots Click
+    // Dot Navigation
     dots.forEach(dot => {
         dot.addEventListener('click', () => {
-            activatePage(parseInt(dot.getAttribute('data-p')));
+            const p = parseInt(dot.dataset.p);
+            if (p !== cur) activatePage(p);
         });
     });
-
-    if (arrUp) arrUp.addEventListener('click', () => activatePage(cur - 1));
-    if (arrDn) arrDn.addEventListener('click', () => activatePage(cur + 1));
 
     // Start Button
     const startBtn = document.getElementById('start-btn');
-    if (startBtn) startBtn.addEventListener('click', () => {
-        burstConfetti(50);
-        setTimeout(() => activatePage(1), 400);
-    });
+    if (startBtn) startBtn.addEventListener('click', () => activatePage(1));
 
-    // ─── PAGE TRIGGERS ───
-    const triggered = {};
-    const onPageEnter = (i) => {
-        const id = pages[i] ? pages[i].id : '';
-        if (id === 'pg-count' && !triggered.cnt) {
-            triggered.cnt = true;
-            animNum('yr', 25, 2200);
-            animNum('mo', 300, 1600); // Rough approx
-            animNum('dy', 9125, 1300);
-            animNum('hr', 219000, 1000);
-        }
-        if (id === 'pg-tw' && !triggered.tw) { triggered.tw = true; goTW(0); }
-        if (id === 'pg-bal' && !triggered.bal) { triggered.bal = true; makeBalloons(); }
-        if (id === 'pg-guest' && !triggered.guest) { triggered.guest = true; loadGuestbook(); }
-        if (id === 'pg-fin' && !triggered.fin) { triggered.fin = true; emojiRain(); initScratch(); }
-    };
+    // ─── LIVE COUNTDOWN ───
+    const startCountdown = () => {
+        const birthDate = new Date('2001-02-14T00:00:00');
+        const update = () => {
+            const now = new Date();
+            let years = now.getFullYear() - birthDate.getFullYear();
+            let months = now.getMonth() - birthDate.getMonth();
+            let days = now.getDate() - birthDate.getDate();
+            let hours = now.getHours();
 
-    // ─── AUDIO ENGINE ───
-    let sfxCtx = null;
-    const getAudio = () => {
-        try {
-            if (!sfxCtx) {
-                const AC = window.AudioContext || window.webkitAudioContext;
-                if (AC) sfxCtx = new AC();
+            if (days < 0) {
+                months--;
+                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
             }
-        } catch (e) { }
-        return sfxCtx;
-    };
-
-    const playTone = (freq, type, dur, vol = 0.04) => {
-        const ctx = getAudio(); if (!ctx) return;
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = type;
-        o.frequency.value = freq;
-        g.gain.setValueAtTime(vol, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.start();
-        o.stop(ctx.currentTime + dur);
-    };
-
-    const playTick = () => playTone(880, 'sine', 0.08, 0.03);
-    const playPop = () => playTone(300 + Math.random() * 200, 'square', 0.12);
-    const playChime = () => {
-        [523, 659, 784, 1047].forEach((f, i) => {
-            setTimeout(() => playTone(f, 'sine', 0.4), i * 120);
-        });
-    };
-
-    // ─── VISUALS: PARTICLES ───
-    const pCanvas = document.getElementById('particle-canvas');
-    const pCtx = pCanvas ? pCanvas.getContext('2d') : null;
-    let particles = [];
-
-    const resizeCanvas = (cv) => {
-        if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
-    };
-
-    const createParticle = () => ({
-        x: Math.random() * (pCanvas ? pCanvas.width : 800),
-        y: Math.random() * (pCanvas ? pCanvas.height : 600),
-        size: Math.random() * 2.2 + 0.4,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        opacity: Math.random() * 0.35 + 0.1,
-        color: Math.random() > 0.5 ? C : R,
-        phase: Math.random() * Math.PI * 2
-    });
-
-    const initParticles = () => {
-        if (!pCanvas) return;
-        resizeCanvas(pCanvas);
-        particles = [];
-        const count = Math.min(90, pCanvas.width * pCanvas.height / 16000);
-        for (let i = 0; i < count; i++) particles.push(createParticle());
-    };
-
-    const animParticles = () => {
-        if (!pCtx || !pCanvas) return;
-        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-
-        particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy; p.phase += 0.02;
-            p.opacity = 0.12 + Math.sin(p.phase) * 0.1;
-
-            // Wall bounce
-            if (p.x < 0 || p.x > pCanvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > pCanvas.height) p.vy *= -1;
-
-            pCtx.beginPath();
-            pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            pCtx.fillStyle = p.color;
-            pCtx.globalAlpha = Math.max(0, p.opacity);
-            pCtx.fill();
-            pCtx.globalAlpha = 1;
-        });
-
-        // Links
-        for (let a = 0; a < particles.length; a++) {
-            for (let b = a + 1; b < particles.length; b++) {
-                const dx = particles[a].x - particles[b].x;
-                const dy = particles[a].y - particles[b].y;
-                const d = Math.sqrt(dx * dx + dy * dy);
-                if (d < 100) {
-                    pCtx.beginPath();
-                    pCtx.moveTo(particles[a].x, particles[a].y);
-                    pCtx.lineTo(particles[b].x, particles[b].y);
-                    pCtx.strokeStyle = C;
-                    pCtx.globalAlpha = 0.025 * (1 - d / 100);
-                    pCtx.lineWidth = 0.5;
-                    pCtx.stroke();
-                    pCtx.globalAlpha = 1;
-                }
+            if (months < 0) {
+                years--;
+                months += 12;
             }
-        }
-        requestAnimationFrame(animParticles);
-    };
 
-    initParticles();
-    animParticles();
-
-    // ─── CURSOR TRAIL ───
-    const TRAIL_N = 15;
-    let mouseX = -100, mouseY = -100;
-    const trail = [];
-
-    for (let ti = 0; ti < TRAIL_N; ti++) {
-        const dot = document.createElement('div');
-        dot.className = 'trail';
-        const sz = 6 - ti * 0.3;
-        Object.assign(dot.style, { width: sz + 'px', height: sz + 'px', opacity: '0' });
-        document.body.appendChild(dot);
-        trail.push({ el: dot, x: 0, y: 0 });
-    }
-
-    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-
-    const animTrail = () => {
-        trail.forEach((t, i) => {
-            const prev = i === 0 ? { x: mouseX, y: mouseY } : trail[i - 1];
-            t.x += (prev.x - t.x) * 0.3;
-            t.y += (prev.y - t.y) * 0.3;
-            t.el.style.left = t.x + 'px';
-            t.el.style.top = t.y + 'px';
-            t.el.style.opacity = mouseX > 0 ? String((1 - i / TRAIL_N) * 0.45) : '0';
-            const tc = i % 3 === 0 ? C : i % 3 === 1 ? R : G;
-            t.el.style.background = tc;
-            t.el.style.boxShadow = `0 0 4px ${tc}`;
-        });
-        requestAnimationFrame(animTrail);
-    };
-    animTrail();
-
-    // ─── CLICK SPARKLE ───
-    document.addEventListener('click', (e) => {
-        const icons = ['✦', '✨', '⭐', '💫', '🌟', '❄️'];
-        icons.forEach((icon, i) => {
-            const sp = document.createElement('div');
-            sp.textContent = icon;
-            sp.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;font-size:${9 + Math.random() * 11}px;pointer-events:none;z-index:10000;transition:all .7s ease;opacity:1;`;
-            document.body.appendChild(sp);
-            const angle = (Math.PI * 2 / icons.length) * i;
-            requestAnimationFrame(() => {
-                sp.style.transform = `translate(${Math.cos(angle) * 45}px, ${Math.sin(angle) * 45}px) scale(0)`;
-                sp.style.opacity = '0';
-            });
-            setTimeout(() => sp.remove(), 750);
-        });
-    });
-
-    // ─── CONFETTI & FIREWORKS ───
-    const burstConfetti = (n) => {
-        for (let i = 0; i < n; i++) setTimeout(mkConfetti, Math.random() * 500);
-    };
-
-    const mkConfetti = () => {
-        const p = document.createElement('div');
-        p.className = 'confetti';
-        const c = COLS[Math.floor(Math.random() * COLS.length)];
-        const sz = 4 + Math.random() * 8;
-        p.style.cssText = `
-            left: ${Math.random() * 100}vw;
-            top: -12px;
-            width: ${sz}px;
-            height: ${sz}px;
-            background: ${c};
-            animation-duration: ${2 + Math.random() * 2.5}s;
-            border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
-            box-shadow: 0 0 ${sz / 2}px ${c}44;
-        `;
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 5000);
-    };
-
-    const fCanvas = document.getElementById('fireworks-canvas');
-    const fCtx = fCanvas ? fCanvas.getContext('2d') : null;
-    let fParts = [];
-    resizeCanvas(fCanvas);
-
-    const createFPart = (x, y, c) => {
-        const a = Math.random() * Math.PI * 2;
-        const sp = Math.random() * 5 + 1.5;
-        return {
-            x, y, color: c,
-            vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-            alpha: 1, decay: 0.011 + Math.random() * 0.014,
-            size: Math.random() * 2.5 + 0.8
+            animNum('yr', years, 1500);
+            animNum('mo', months, 1200);
+            animNum('dy', days, 1000);
+            animNum('hr', hours, 800);
         };
+        update();
     };
-
-    const launchFW = (n) => {
-        if (!fCanvas) return;
-        for (let i = 0; i < n; i++) {
-            setTimeout(() => {
-                const x = Math.random() * fCanvas.width * 0.7 + fCanvas.width * 0.15;
-                const y = Math.random() * fCanvas.height * 0.35 + fCanvas.height * 0.1;
-                const c = COLS[Math.floor(Math.random() * COLS.length)];
-                for (let j = 0; j < 45; j++) fParts.push(createFPart(x, y, c));
-            }, i * 300);
-        }
-    };
-
-    const animFW = () => {
-        if (fCtx && fParts.length > 0) {
-            fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
-            fParts = fParts.filter(p => {
-                p.x += p.vx; p.y += p.vy; p.vy += 0.035;
-                p.alpha -= p.decay; p.vx *= 0.98; p.vy *= 0.98;
-                if (p.alpha <= 0) return false;
-
-                fCtx.beginPath();
-                fCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                fCtx.fillStyle = p.color;
-                fCtx.globalAlpha = Math.max(0, p.alpha);
-                fCtx.fill();
-                fCtx.globalAlpha = 1;
-                return true;
-            });
-        }
-        requestAnimationFrame(animFW);
-    };
-    animFW();
 
     // ─── CAKE ───
     let blown = false;
@@ -393,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         blown = true;
         playChime();
         const flames = document.querySelectorAll('.flame');
-        flames.forEach((flame, i) => setTimeout(() => flame.classList.add('out'), i * 100));
+        flames.forEach((flame, i) => setTimeout(() => flame.classList.add('out'), i * 120));
 
         setTimeout(() => {
             const m = document.getElementById('cake-msg');
@@ -401,9 +456,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 m.textContent = '🎉 Your wish is commanded to the stars! ⭐';
                 m.classList.add('ok');
             }
-            burstConfetti(100);
+            burstConfetti(120);
             launchFW(7);
-        }, 600);
+        }, 700);
     };
 
     const blowBtn = document.getElementById('blow-btn');
@@ -414,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ─── TYPEWRITER (UPDATED) ───
+    // ─── TYPEWRITER (ENHANCED) ───
     const twMessages = [
         "To the one who knows all my secrets... 🤫",
         "And still chooses to be seen in public with me! 💖",
@@ -441,12 +496,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const typeWriter = (text) => {
         let ci = 0;
         if (twEl) twEl.textContent = '';
+        playTick();
         const next = () => {
             if (ci < text.length) {
                 twEl.textContent += text[ci]; ci++;
-                twTimer = setTimeout(next, 45 + Math.random() * 20);
+                twTimer = setTimeout(next, 40 + Math.random() * 25);
             } else {
-                twTimer = setTimeout(() => goTW((twIdx + 1) % twMessages.length), 3000);
+                twTimer = setTimeout(() => goTW((twIdx + 1) % twMessages.length), 3500);
             }
         };
         next();
@@ -462,15 +518,33 @@ document.addEventListener('DOMContentLoaded', () => {
         typeWriter(twMessages[i]);
     };
 
-    // ─── GUESTBOOK (NEW) ───
+    // ─── FLOATING EMOJI DECORATIONS ───
+    const spawnFloatingDecos = () => {
+        const container = document.getElementById('float-deco');
+        if (!container) return;
+        container.innerHTML = '';
+        const emojis = ['💖', '✨', '🦋', '🌟', '💕', '🌸', '💎'];
+        for (let i = 0; i < 12; i++) {
+            const d = document.createElement('div');
+            d.className = 'fd';
+            d.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            d.style.left = Math.random() * 100 + '%';
+            d.style.top = Math.random() * 100 + '%';
+            d.style.animationDelay = (Math.random() * 5) + 's';
+            d.style.animationDuration = (6 + Math.random() * 4) + 's';
+            d.style.fontSize = (0.8 + Math.random() * 0.8) + 'rem';
+            container.appendChild(d);
+        }
+    };
+
+    // ─── GUESTBOOK ───
     const loadGuestbook = () => {
         const board = document.getElementById('gb-board');
         if (!board) return;
         board.innerHTML = '';
         const saved = JSON.parse(localStorage.getItem('guestbook') || '[]');
         if (saved.length === 0) {
-            // Default note
-            saved.push({ msg: "Happy 25th! This is the start of something amazing!", date: new Date().toLocaleDateString() });
+            saved.push({ msg: "Happy 25th! This is the start of something amazing! 🎉", date: new Date().toLocaleDateString() });
         }
         saved.forEach(n => addNoteToBoard(n.msg, n.date));
     };
@@ -494,73 +568,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('guestbook', JSON.stringify(saved));
                 addNoteToBoard(note.msg, note.date);
                 txt.value = '';
-                burstConfetti(20);
+                burstConfetti(25);
+                playPop();
             }
         });
     }
 
-    // ─── 3D GALLERY (NEW) ───
-    const gal3d = document.querySelector('.gallery-3d');
-    if (gal3d) {
-        const items = gal3d.querySelectorAll('.g3d-item');
-        const count = items.length;
-        const radius = 350; // Distance from center
-        let angle = 0;
-        let targetAngle = 0;
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
+    // ─── 3D GALLERY ───
+    const initGallery = () => {
+        const gal = document.querySelector('.gallery-3d');
+        if (!gal) return;
 
-        // Position items
+        const items = gal.querySelectorAll('.g3d-item');
+        const count = items.length;
+        const radius = 350;
+
         items.forEach((item, i) => {
-            const theta = (i / count) * Math.PI * 2;
-            item.style.transform = `rotateY(${theta}rad) translateZ(${radius}px)`;
+            const angle = (i / count) * 360;
+            item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
         });
 
-        // Loop
-        const animateGallery = () => {
-            angle += (targetAngle - angle) * 0.1;
-            gal3d.style.transform = `translateZ(-${radius}px) rotateY(${angle}deg)`;
-            requestAnimationFrame(animateGallery);
+        let currDeg = 0, isDrag = false, startX = 0, prevDeg = 0, autoRot = true;
+
+        const container = document.querySelector('.gallery-3d-container');
+
+        if (container) {
+            container.addEventListener('mousedown', (e) => {
+                isDrag = true; autoRot = false;
+                startX = e.clientX; prevDeg = currDeg;
+                gal.classList.add('grabbing');
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDrag) return;
+                currDeg = prevDeg - (e.clientX - startX) * 0.5;
+                gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`;
+            });
+            window.addEventListener('mouseup', () => {
+                isDrag = false;
+                gal.classList.remove('grabbing');
+                setTimeout(() => autoRot = true, 3000);
+            });
+
+            // Touch support
+            container.addEventListener('touchstart', (e) => {
+                isDrag = true; autoRot = false;
+                startX = e.touches[0].clientX; prevDeg = currDeg;
+            });
+            window.addEventListener('touchmove', (e) => {
+                if (!isDrag) return;
+                currDeg = prevDeg - (e.touches[0].clientX - startX) * 0.5;
+                gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`;
+            });
+            window.addEventListener('touchend', () => {
+                isDrag = false;
+                setTimeout(() => autoRot = true, 3000);
+            });
+        }
+
+        const loop = () => {
+            if (autoRot && !isDrag) {
+                currDeg += 0.15;
+                gal.style.transform = `rotateX(-5deg) rotateY(${currDeg}deg)`;
+            }
+            requestAnimationFrame(loop);
         };
-        animateGallery();
-
-        // Drag events
-        const startDrag = (e) => {
-            isDragging = true;
-            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            gal3d.classList.add('grabbing');
-        };
-
-        const moveDrag = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const delta = x - startX;
-            targetAngle += delta * 0.5;
-            startX = x;
-        };
-
-        const endDrag = () => {
-            isDragging = false;
-            gal3d.classList.remove('grabbing');
-        };
-
-        gal3d.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', moveDrag);
-        document.addEventListener('mouseup', endDrag);
-
-        gal3d.addEventListener('touchstart', startDrag);
-        document.addEventListener('touchmove', moveDrag);
-        document.addEventListener('touchend', endDrag);
-    }
+        loop();
+    };
+    initGallery();
 
     // ─── EMOJI RAIN ───
     const emojiRain = () => {
         const emojis = ['🎂', '🎁', '🎈', '🎊', '🎉', '💖', '🌟', '✨', '🦋', '🌹', '💎'];
         let count = 0;
         const int = setInterval(() => {
-            if (count >= 22) { clearInterval(int); return; }
+            if (count >= 25) { clearInterval(int); return; }
             const e = document.createElement('div');
             e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
             e.className = 'confetti';
@@ -569,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(e);
             setTimeout(() => e.remove(), 5500);
             count++;
-        }, 160);
+        }, 140);
     };
 
     // ─── BALLOONS ───
@@ -582,12 +663,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const makeBalloons = () => {
         if (!bArena) return;
         bArena.innerHTML = '';
+        popCount = 0;
+        if (bScore) bScore.textContent = '0';
+        if (bPrize) bPrize.classList.add('hidden');
+
         for (let i = 0; i < 15; i++) {
             const b = document.createElement('div');
             b.className = 'balloon';
             const c = COLS[i % COLS.length];
-            b.style.background = `radial-gradient(circle at 30% 20%, rgba(255,255,255,.35), ${c} 60%)`;
+            b.style.background = `radial-gradient(circle at 30% 20%, rgba(255,255,255,.4), ${c} 60%)`;
             b.style.animationDelay = `${Math.random() * 2}s`;
+            b.style.animationDuration = `${3 + Math.random() * 2}s`;
 
             b.addEventListener('click', function () {
                 if (this.classList.contains('pop')) return;
@@ -596,19 +682,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 playPop();
                 if (bScore) bScore.textContent = popCount;
 
-                // Show Msg
                 const msg = document.createElement('div');
                 msg.textContent = bTexts[i];
                 msg.style.cssText = `position:absolute;left:${this.offsetLeft}px;top:${this.offsetTop - 12}px;font-size:.85rem;color:${C};pointer-events:none;transition:all .7s ease;font-weight:700;white-space:nowrap;z-index:99;`;
                 bArena.appendChild(msg);
-                setTimeout(() => { msg.style.transform = 'translateY(-30px)'; msg.style.opacity = '0'; }, 10);
+                setTimeout(() => { msg.style.transform = 'translateY(-35px)'; msg.style.opacity = '0'; }, 10);
                 setTimeout(() => msg.remove(), 750);
 
-                burstConfetti(5);
+                burstConfetti(6);
                 if (popCount >= 15) {
                     setTimeout(() => {
                         if (bPrize) bPrize.classList.remove('hidden');
-                        playChime(); burstConfetti(70); launchFW(5);
+                        playChime(); burstConfetti(80); launchFW(5);
                     }, 350);
                 }
             });
@@ -631,25 +716,79 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(step);
     };
 
-    // ─── PUZZLE ───
+    // ─── PUZZLE (CLICK-TO-PLACE FOR MOBILE) ───
     const pzDrop = document.getElementById('pz-drop');
+    const lhPiece = document.getElementById('lh');
+    const rhPiece = document.getElementById('rh');
+    const fullHeart = document.getElementById('full-h');
+    const pzWin = document.getElementById('pz-win');
     let leftPlaced = false, rightPlaced = false;
 
+    const completePuzzle = () => {
+        if (leftPlaced && rightPlaced) {
+            if (fullHeart) fullHeart.classList.remove('hidden');
+            if (pzWin) pzWin.classList.remove('hidden');
+            burstConfetti(60);
+            playChime();
+        }
+    };
+
+    // Click-to-place for mobile
+    if (lhPiece) {
+        lhPiece.addEventListener('click', () => {
+            if (leftPlaced) return;
+            leftPlaced = true;
+            lhPiece.classList.add('placed');
+            lhPiece.style.opacity = '0';
+            lhPiece.style.transform = 'scale(0)';
+            playPop();
+            completePuzzle();
+        });
+    }
+    if (rhPiece) {
+        rhPiece.addEventListener('click', () => {
+            if (rightPlaced) return;
+            rightPlaced = true;
+            rhPiece.classList.add('placed');
+            rhPiece.style.opacity = '0';
+            rhPiece.style.transform = 'scale(0)';
+            playPop();
+            completePuzzle();
+        });
+    }
+
+    // Drag support
     if (pzDrop) {
         pzDrop.addEventListener('dragover', (e) => { e.preventDefault(); pzDrop.classList.add('over'); });
         pzDrop.addEventListener('dragleave', () => pzDrop.classList.remove('over'));
         pzDrop.addEventListener('drop', (e) => {
-            e.preventDefault(); pzDrop.classList.remove('over');
-            // Simplified for brevity - assumes logic is sound
+            e.preventDefault();
+            pzDrop.classList.remove('over');
+            const id = e.dataTransfer.getData('text/plain');
+            if (id === 'lh' && !leftPlaced) {
+                leftPlaced = true;
+                if (lhPiece) { lhPiece.classList.add('placed'); lhPiece.style.opacity = '0'; lhPiece.style.transform = 'scale(0)'; }
+                playPop();
+            }
+            if (id === 'rh' && !rightPlaced) {
+                rightPlaced = true;
+                if (rhPiece) { rhPiece.classList.add('placed'); rhPiece.style.opacity = '0'; rhPiece.style.transform = 'scale(0)'; }
+                playPop();
+            }
+            completePuzzle();
         });
     }
-    // Note: Re-implementing full puzzle logic might be verbose here, but keeping it simple for the key parts.
-    // The previous implementation was good. I'll make sure the key listeners are attached if needed. 
-    // Actually, I should probably keep the puzzle logic robust.
 
-    // ... (Puzzle Logic Simplified for this artifact to stay within limits, but in real app I'd fully implement)
-    // Re-adding the basic puzzle click logic for mobile support as substitute if drag fails?
-    // Let's stick to the visual enhancements. The previous drag logic was fine, I'll assume users use mouse.
+    // Drag start
+    [lhPiece, rhPiece].forEach(piece => {
+        if (piece) {
+            piece.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', piece.id);
+                piece.classList.add('dragging');
+            });
+            piece.addEventListener('dragend', () => piece.classList.remove('dragging'));
+        }
+    });
 
     // ─── GIFT LOGIC ───
     let giftOpened = false;
@@ -659,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (giftOpened) return;
             giftOpened = true;
             document.getElementById('gift-lid').classList.add('open');
-            playChime(); burstConfetti(60); launchFW(4);
+            playChime(); burstConfetti(80); launchFW(5);
             setTimeout(() => {
                 document.getElementById('gift-w').style.display = 'none';
                 document.getElementById('gift-reveal').classList.remove('hidden');
@@ -667,13 +806,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ─── WISHES ───
+    // ─── WISHES CAROUSEL (SWIPE SUPPORT) ───
     const wishes = document.querySelectorAll('.wish');
     let curW = 0;
     const wDotsC = document.getElementById('w-dots');
 
-    if (wDotsC) { // Re-init dots } 
-        // ... (Already handled by logic above ideally, but explicit rewrite for clarity)
+    if (wDotsC && wishes.length > 0) {
+        wishes.forEach((_, wi) => {
+            const d = document.createElement('div');
+            d.className = `wd ${wi === 0 ? 'on' : ''}`;
+            d.addEventListener('click', () => goWish(wi));
+            wDotsC.appendChild(d);
+        });
+    }
+
+    const goWish = (idx) => {
+        wishes.forEach((w, i) => {
+            w.classList.remove('active', 'exit');
+            if (i === curW && i !== idx) w.classList.add('exit');
+            if (i === idx) setTimeout(() => w.classList.add('active'), 50);
+        });
+        curW = idx;
+        if (wDotsC) {
+            wDotsC.querySelectorAll('.wd').forEach((d, i) => d.classList.toggle('on', i === idx));
+        }
+    };
+
+    const wPrev = document.getElementById('w-prev');
+    const wNext = document.getElementById('w-next');
+    if (wPrev) wPrev.addEventListener('click', () => goWish((curW - 1 + wishes.length) % wishes.length));
+    if (wNext) wNext.addEventListener('click', () => goWish((curW + 1) % wishes.length));
+
+    // Swipe support for wishes
+    const wishBox = document.getElementById('wishes-box');
+    if (wishBox) {
+        let wTouchStart = 0;
+        wishBox.addEventListener('touchstart', (e) => { wTouchStart = e.touches[0].clientX; });
+        wishBox.addEventListener('touchend', (e) => {
+            const diff = wTouchStart - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) goWish((curW + 1) % wishes.length);
+                else goWish((curW - 1 + wishes.length) % wishes.length);
+            }
+        });
     }
 
     // ─── SCRATCH ───
@@ -683,17 +858,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = sc.getContext('2d');
         let scratching = false;
 
-        ctx.fillStyle = '#1a2a45';
+        // Draw cover
+        const grad = ctx.createLinearGradient(0, 0, sc.width, sc.height);
+        grad.addColorStop(0, '#0a1628');
+        grad.addColorStop(1, '#1a2a45');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, sc.width, sc.height);
-        ctx.fillStyle = '#fff';
-        ctx.font = '16px sans-serif';
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.font = '16px "Outfit", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('✨ Scratch Me! ✨', sc.width / 2, sc.height / 2 + 5);
+
+        // Add sparkle dots
+        for (let i = 0; i < 20; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * sc.width, Math.random() * sc.height, Math.random() * 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0, 255, 222, ${Math.random() * 0.3})`;
+            ctx.fill();
+        }
 
         const scratch = (x, y) => {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
-            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalCompositeOperation = 'source-over';
         };
@@ -705,7 +893,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return { x: cx - r.left, y: cy - r.top };
         };
 
-        ['mousedown', 'touchstart'].forEach(ev => sc.addEventListener(ev, (e) => { scratching = true; const p = getPos(e); scratch(p.x, p.y); }));
+        ['mousedown', 'touchstart'].forEach(ev => sc.addEventListener(ev, (e) => {
+            scratching = true; const p = getPos(e); scratch(p.x, p.y);
+        }));
         ['mousemove', 'touchmove'].forEach(ev => sc.addEventListener(ev, (e) => {
             if (scratching) {
                 e.preventDefault();
@@ -722,19 +912,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signBtn && certStamp) {
         signBtn.addEventListener('click', () => {
             playChime();
-            burstConfetti(100);
-            launchFW(5);
+            burstConfetti(120);
+            launchFW(6);
             signBtn.style.transform = 'scale(0)';
             setTimeout(() => {
                 signBtn.style.display = 'none';
                 certStamp.classList.remove('hidden');
                 setTimeout(() => certStamp.classList.add('stamped'), 50);
             }, 300);
-            // Save to local storage
             localStorage.setItem('bestie-signed', 'true');
         });
 
-        // Check if already signed
         if (localStorage.getItem('bestie-signed') === 'true') {
             signBtn.style.display = 'none';
             certStamp.classList.remove('hidden');
@@ -742,5 +930,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    console.log(`%c🚀 Damithri's 25th Engine Loaded!`, 'color:#00FFDE;font-weight:bold;font-size:16px;');
+    // ─── MEGA BUTTON ───
+    const megaBtn = document.getElementById('mega-btn');
+    if (megaBtn) {
+        megaBtn.addEventListener('click', () => {
+            playChime();
+            launchFW(15);
+            burstConfetti(250);
+            emojiRain();
+            megaBtn.innerHTML = '<span>🍻 Besties Forever! 🍻</span>';
+            megaBtn.classList.add('celebrated');
+        });
+    }
+
+    // Init Scratch
+    initScratch();
+
+    console.log(`%c🚀 Damithri's 25th Premium Engine v6 Loaded!`, 'color:#00FFDE;font-weight:bold;font-size:16px;background:#000;padding:4px 12px;border-radius:4px;');
 });
